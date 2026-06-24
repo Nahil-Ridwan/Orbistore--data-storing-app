@@ -11,11 +11,8 @@ import { addEntry } from '../../storage/entries';
 import { colors, globalStyles } from '../../styles/global';
 
 
-type Props = {
-  onAdd: () => void;
-};
 
-export default function AddEntryScreen({ onAdd }: Props ) {
+export default function AddEntryScreen() {
   const [company, setCompany] = useState('');
   const [device, setDevice] = useState('');
   const [username, setUsername] = useState('');
@@ -36,8 +33,6 @@ export default function AddEntryScreen({ onAdd }: Props ) {
     Alert.alert('Error', 'Please enter a sim and imei.');
     return;
   }
-
-  const createdAt = new Date();
 
   const monthMap: Record<string, number> = {
     JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
@@ -85,7 +80,12 @@ export default function AddEntryScreen({ onAdd }: Props ) {
   // rest unchanged...
     console.log('saving:', { company, mobile, type, lock, installdate, note });
 
-    await addEntry({
+    // Don't await this — Firestore's write promise only resolves once the
+    // server confirms it, which won't happen while offline. The local
+    // cache write (and your subscribeToEntries listener) already update
+    // the UI instantly, so fire the write and reset the form right away
+    // instead of blocking on network confirmation.
+    addEntry({
       company: company || 'Nil',
       device: Number(device) || 0,
       username: username || 'Nil',
@@ -101,6 +101,9 @@ export default function AddEntryScreen({ onAdd }: Props ) {
       sim: Number(sim),
       imei: Number(imei),
       note: note || 'Nil',
+    }).catch((err) => {
+      console.error('Failed to add entry:', err);
+      Alert.alert('Save failed', 'Your entry is saved locally and will sync once online.');
     });
 
     setCompany('');
@@ -119,8 +122,6 @@ export default function AddEntryScreen({ onAdd }: Props ) {
     setNote('');
 
 
-
-    onAdd();
   };
 
   return (

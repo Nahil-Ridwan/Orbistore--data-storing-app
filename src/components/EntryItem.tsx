@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { deleteEntry, Entry, updateEntry } from '../storage/entries';
+import { deleteEntry, Entry, syncStatuses, updateEntry } from '../storage/entries';
 import { colors } from '../styles/global';
 import ShareButton from './ShareButton';
 import SmsButton from './SmsButton';
@@ -30,13 +31,14 @@ type EntryItemProps = {
   renewal4?: string;
   renewal5?: string;
   createdAt: string;
-  onDelete: () => void;
 };
 
 
-export default function EntryItem({
-  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt, onDelete,
+export default React.memo(function EntryItem({
+  
+  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
 }: EntryItemProps) {
+  console.log('EntryItem render', id);
   const [modalVisible, setModalVisible] = useState(false);
   const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
   
@@ -48,16 +50,17 @@ export default function EntryItem({
   const handleLongPress = () => {
     Alert.alert('Delete Entry', `Are you sure you want to delete "${vehicle}"?`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: async () => { await deleteEntry(id); onDelete(); } },
+      { text: 'Delete', style: 'destructive', onPress: () => { deleteEntry(id).catch((err) => console.error('Failed to delete entry:', err));} },
     ]);
   };
 
-  const handleSave = async () => {
-    
-    const monthMap: Record<string, number> = {
-    JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
-    JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
+
+  const monthMap: Record<string, number> = {
+  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
+  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
   };
+
+  const handleSave = async () => {
 
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -93,16 +96,19 @@ export default function EntryItem({
     renewal4: formatDate(edited.renewal4),
     renewal5: formatDate(edited.renewal5),
   };
-   
-    await updateEntry(updatedEntry);
-    setModalVisible(false);
-    onDelete(); // reload
-  };
 
-  const monthMap: Record<string, number> = {
-  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
-  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
-  };
+    setModalVisible(false);
+   
+    try {
+    await updateEntry(updatedEntry);
+    await syncStatuses();
+  } catch (err) {
+    console.error('Failed to save entry:', err);
+    Alert.alert('Save failed', 'Your change is saved locally and will sync once online.');
+  }
+};
+
+  
 
   const isExpired = (dateStr?: string) => {
     if (!dateStr) return false;
@@ -113,16 +119,12 @@ export default function EntryItem({
     return expDate < new Date();
   };
 
-  useEffect(() => {
-  if (!expdate) return; // skip if no expdate
-
-  if (isExpired(expdate) && status?.toLowerCase().trim() == 'active') {
-    updateEntry({ ...entry, status: 'EXPIRED' }).then(() => onDelete());
-
-  } else if (!isExpired(expdate) && status?.toLowerCase().trim() == 'expired') {
-    updateEntry({ ...entry, status: 'ACTIVE' }).then(() => onDelete());
-  }
-}, [expdate, status]);
+  const displayStatus = (() => {
+  if (!expdate) return status;
+  else if (isExpired(expdate) && status?.toLowerCase().trim() == 'active') return 'EXPIRED';
+  else if (!isExpired(expdate) && status?.toLowerCase().trim() == 'expired') return 'ACTIVE'
+  else return status;
+})();
 
 
   return (
@@ -131,12 +133,12 @@ export default function EntryItem({
         <View style={styles.row}>
           <View style={styles.info}>
             <Text style={styles.name}>{vehicle}   <Text style={{ fontSize:15, color: isExpired(expdate)? '#ff4d4d' : '#4caf50' }}>{validity}</Text></Text>
-            <Text style={styles.macros}>{device} • {company}</Text>
+            <Text style={styles.macros}><Text style={{fontWeight:'600', color:'#bfbfd2'}}>{device}</Text> • {company}</Text>
             <Text style={styles.macros}><Text style={{ fontSize:14, fontWeight:'600', color:colors.text }}>{username}</Text> • <Text style={{ color: isExpired(expdate)? '#ff4d4d' : '#4caf50' }}>{expdate}</Text></Text>
           </View>
           <View style={styles.actions}>
-           <Text numberOfLines={1} style={{ fontSize:14, marginBottom:6, color: status?.toLowerCase().trim()==='active' ? '#4caf50' : status?.toLowerCase().trim()==='expired' ? '#ff4d4d' : '#a0a0b0' }}>
-           {status}</Text>
+           <Text numberOfLines={1} style={{ fontSize:14, marginBottom:6, color: displayStatus?.toLowerCase().trim()==='active' ? '#4caf50' : displayStatus?.toLowerCase().trim()==='expired' ? '#ff4d4d' : '#a0a0b0' }}>
+            {displayStatus}</Text>
            <View style={styles.actionButtons}>
              <View style={{  marginTop:7 }}><SmsButton entry={entry} /></View>
              <View style={{  marginBottom:4 }}><ShareButton entry={entry} /></View>
@@ -148,7 +150,10 @@ export default function EntryItem({
       <Modal visible={modalVisible} animationType='slide' transparent>
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Vehicle Details</Text>
+            <View style={{flexDirection:'row', alignContent:'center', justifyContent:'space-between'}}>
+              <Text style={styles.modalTitle}>Vehicle Details</Text>
+              <Ionicons style={{ marginRight:4 }} onPress={() => setModalVisible(false)} name= 'close-outline' size={27} color={colors.primary} />
+            </View>
             <ScrollView>
               {(() => {
                 const rows: [string, keyof Entry][][] = [
@@ -206,6 +211,8 @@ export default function EntryItem({
                           <TextInput
                             style={[
                               styles.fieldInput,
+                              ['username', 'status', 'mobile', 'vehicle', 'installdate'].includes(key) &&
+                                styles.highlightField,
                               key === 'note' && styles.noteInput,
                             ]}
                             value={String(edited[key] ?? '')}
@@ -229,9 +236,6 @@ export default function EntryItem({
               })()}
             </ScrollView>
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveText}>Save</Text>
               </TouchableOpacity>
@@ -241,7 +245,7 @@ export default function EntryItem({
       </Modal>
     </>
   );
-}
+})
 
 const styles = StyleSheet.create({
   container: { backgroundColor: colors.surface, borderRadius: 10, padding: 16, marginBottom: 10 },
@@ -287,13 +291,16 @@ checkboxstyle: {
   paddingBottom: 10,
   textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
 },
+highlightField: {
+  backgroundColor: colors.background,
+},
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
   modal: { backgroundColor: colors.surface, borderRadius: 16, padding: 20, maxHeight: '85%' },
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },
   field: { marginBottom: 12 },
   label: { fontSize: 12, color: colors.textSecondary, marginBottom: 4 },
-  fieldInput: { backgroundColor: colors.background, color: colors.text, padding: 10, borderRadius: 8, fontSize: 15 },
+  fieldInput: { backgroundColor: '#3e3e5c', color: colors.text, padding: 10, borderRadius: 8, fontSize: 15 },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
   cancelButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: colors.background },
   cancelText: { color: colors.textSecondary, fontWeight: '600' },

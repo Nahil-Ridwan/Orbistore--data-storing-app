@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Entry, getEntries } from '../../storage/entries';
+import NetworkToast from '../../components/NetworkToast';
+import { Entry, getEntries, subscribeToEntries } from '../../storage/entries';
 import { colors } from '../../styles/global';
 
 
@@ -19,25 +20,35 @@ const TABS = [
 ];
 
 export default function TabLayout() {
+  
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState(0);
   const pagerRef = useRef<PagerView>(null);
+
+  const [entries, setEntries] = useState<Entry[]>([]);
+
+  const loadEntries = async () => {
+  const data = await getEntries();
+  console.log('LOAD ENTRIES', data.length);
+  setEntries(data);
+};
 
   const goToTab = (index: number) => {
     setActiveTab(index);
     pagerRef.current?.setPage(index);
   };
 
-  const [entries, setEntries] = useState<Entry[]>([]);
-
-  const loadEntries = async () => {
-  const data = await getEntries();
-  setEntries(data);
-  };
+  const [searchVisible, setSearchVisible] = useState(false);
  
+  const openAllEntriesWithSearch = () => {
+  setSearchVisible(true);
+  goToTab(2); // AllEntriesScreen is page 0 in your PagerView
+};
+
   useEffect(() => {
-   loadEntries();
-  }, []);
+  const unsubscribe = subscribeToEntries(setEntries);
+  return () => unsubscribe();
+}, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -47,10 +58,21 @@ export default function TabLayout() {
         initialPage={0}
         onPageSelected={(e) => setActiveTab(e.nativeEvent.position)}
       >
-        <View key="0" style={{ flex: 1 }}><HomeScreen entries={entries} onDelete={loadEntries}/></View>
-        <View key="1" style={{ flex: 1 }}><AddEntryScreen onAdd={loadEntries}/></View>
-        <View key="2" style={{ flex: 1 }}><AllEntriesScreen entries={entries} onDelete={loadEntries}/></View>
+        <View key="0" style={{ flex: 1 }}><HomeScreen 
+         reload={loadEntries}
+         openAllEntriesWithSearch={openAllEntriesWithSearch}
+         entries={entries}/></View>
+        <View key="1" style={{ flex: 1 }}><AddEntryScreen/></View>
+        <View key="2" style={{ flex: 1 }}><AllEntriesScreen
+         searchVisible={searchVisible} 
+         setSearchVisible={setSearchVisible} 
+         entries={entries}/></View>
+        
+        
+        
       </PagerView>
+
+       <NetworkToast />
 
       {/* Custom Tab Bar */}
       <View style={[styles.tabBar, { bottom: insets.bottom + 16 }]}>

@@ -7,10 +7,9 @@ import EntryItem from './EntryItem';
 
 type RecentEntryProps = {
   entries: Entry[];
-  onDelete: () => void;
 };
 
-export default function RecentEntries({ entries, onDelete }: RecentEntryProps) {
+export default function RecentEntries({ entries }: RecentEntryProps) {
   return (
     <View style={{ marginTop: 30 }}>
       <Text style={styles.sectionTitle}>Recent Vehicles</Text>
@@ -45,7 +44,6 @@ export default function RecentEntries({ entries, onDelete }: RecentEntryProps) {
               renewal4={entry.renewal4}
               renewal5={entry.renewal5}
               createdAt={entry.createdAt}
-              onDelete={onDelete}
             />
           ))
       )}
