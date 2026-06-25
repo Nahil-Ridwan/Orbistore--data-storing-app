@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { addEntry } from '../../storage/entries';
+import { addEntry } from '../../storage/coreCrud';
 import { colors, globalStyles } from '../../styles/global';
 
 

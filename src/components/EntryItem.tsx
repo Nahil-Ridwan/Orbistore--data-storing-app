@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { deleteEntry, Entry, syncStatuses, updateEntry } from '../storage/entries';
+import { deleteEntry, updateEntry } from '../storage/coreCrud';
+import { syncStatuses } from '../storage/helpers';
+import { Entry } from '../storage/typeEntry';
 import { colors } from '../styles/global';
 import ShareButton from './ShareButton';
 import SmsButton from './SmsButton';

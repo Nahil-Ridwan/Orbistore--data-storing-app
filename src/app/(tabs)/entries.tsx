@@ -3,7 +3,8 @@ import { FlashList } from '@shopify/flash-list';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import EntryItem from '../../components/EntryItem';
-import { clearAllEntries, Entry } from '../../storage/entries';
+import { clearAllEntries } from '../../storage/coreCrud';
+import { Entry } from '../../storage/typeEntry';
 import { colors, globalStyles } from '../../styles/global';
 
 type Props = {
@@ -12,12 +13,13 @@ type Props = {
   setSearchVisible: (value: boolean) => void;
 };
 
-export default function AllEntriesScreen({ entries, searchVisible, setSearchVisible}: Props) {
+export default function AllEntriesScreen({ entries, searchVisible, setSearchVisible }: Props) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [filterCompany, setFilterCompany] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPayment, setFilterPayment] = useState('');
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -83,18 +85,64 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
 
-      {/* ---- Fixed header — stays put while the list scrolls ---- */}
-      <View style={styles.header}>
+      {/* ---- Scrollable list — fills the FULL screen from the very top ---- */}
+      <FlashList
+        key={searchVisible ? 'search-open' : 'search-closed'}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 140,
+          // Push content down by the measured header height so items start below the header.
+          // As items scroll up they pass behind the absolutely-positioned header.
+          paddingTop: headerHeight + 10,
+        }}
+        data={filtered}
+        keyExtractor={(entry) => String(entry.id)}
+        ListEmptyComponent={<Text style={globalStyles.empty}>No entries found.</Text>}
+        renderItem={({ item: entry }) => (
+          <EntryItem
+            key={entry.id}
+            id={entry.id}
+            company={entry.company}
+            device={entry.device}
+            username={entry.username}
+            mobile={entry.mobile}
+            vehicle={entry.vehicle}
+            type={entry.type}
+            lock={entry.lock}
+            devicemodel={entry.devicemodel}
+            installdate={entry.installdate}
+            expdate={entry.expdate}
+            validity={entry.validity}
+            status={entry.status}
+            payment={entry.payment}
+            sim={entry.sim}
+            imei={entry.imei}
+            note={entry.note}
+            renewal1={entry.renewal1}
+            renewal2={entry.renewal2}
+            renewal3={entry.renewal3}
+            renewal4={entry.renewal4}
+            renewal5={entry.renewal5}
+            createdAt={entry.createdAt}
+          />
+        )}
+      />
+
+      {/* ---- Header — absolutely positioned so the list scrolls behind it ---- */}
+      <View
+        style={styles.header}
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+      >
         <View style={globalStyles.header}>
           <Text
             onLongPress={handleClearAll}
-            style={[globalStyles.title, { marginBottom: 20, marginLeft:6 }]}
+            style={[globalStyles.title, { marginBottom: 15, marginLeft: 6 }]}
           >
             All Vehicles
           </Text>
           <TouchableOpacity onPress={toggleSearch}>
             <Ionicons
-              style={{ marginBottom: 15, marginRight: 13 }}
+              style={{ marginBottom: 10, marginRight: 13 }}
               name={searchVisible ? 'close-outline' : 'search-outline'}
               size={26}
               color={colors.primary}
@@ -146,46 +194,6 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         )}
       </View>
 
-      {/* ---- Scrollable list only ---- */}
-      <FlashList
-         key={searchVisible ? 'search-open' : 'search-closed'}
-        contentContainerStyle={{
-          paddingHorizontal: globalStyles.container.paddingHorizontal,
-          paddingBottom: 140,
-          paddingTop: 10,
-        }}
-        data={filtered}
-        keyExtractor={(entry) => String(entry.id)}
-        ListEmptyComponent={<Text style={globalStyles.empty}>No entries found.</Text>}
-        renderItem={({ item: entry }) => (
-          <EntryItem
-            key={entry.id}
-            id={entry.id}
-            company={entry.company}
-            device={entry.device}
-            username={entry.username}
-            mobile={entry.mobile}
-            vehicle={entry.vehicle}
-            type={entry.type}
-            lock={entry.lock}
-            devicemodel={entry.devicemodel}
-            installdate={entry.installdate}
-            expdate={entry.expdate}
-            validity={entry.validity}
-            status={entry.status}
-            payment={entry.payment}
-            sim={entry.sim}
-            imei={entry.imei}
-            note={entry.note}
-            renewal1={entry.renewal1}
-            renewal2={entry.renewal2}
-            renewal3={entry.renewal3}
-            renewal4={entry.renewal4}
-            renewal5={entry.renewal5}
-            createdAt={entry.createdAt}
-          />
-        )}
-      />
     </View>
   );
 }
@@ -200,9 +208,16 @@ const styles = {
     marginTop: 0,
   },
   header: {
-    flex: 0,
+    // Floats above the FlashList — the list scrolls behind this
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
     backgroundColor: colors.background,
     paddingTop: 60,
     paddingHorizontal: 20,
+    paddingBottom: 8,
+    zIndex: 10,
+    elevation: 10,
   },
 };

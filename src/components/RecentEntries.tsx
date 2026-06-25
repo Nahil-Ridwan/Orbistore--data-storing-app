@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { Entry } from '../storage/entries';
+import { Entry } from '../storage/typeEntry';
 import EntryItem from './EntryItem';
 
 

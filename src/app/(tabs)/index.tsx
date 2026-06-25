@@ -3,7 +3,8 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import HomeHeader from '../../components/HomeHeader';
 import MacroGrid from '../../components/MacroGrid';
 import RecentEntries from '../../components/RecentEntries';
-import { Entry, exportEntries, pickAndImportEntries } from '../../storage/entries';
+import { exportEntries, pickAndImportEntries } from '../../storage/importExport';
+import { Entry } from '../../storage/typeEntry';
 import { colors, globalStyles } from '../../styles/global';
 
 type Props = {

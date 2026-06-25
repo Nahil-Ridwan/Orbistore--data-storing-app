@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
-import { Entry } from '../storage/entries';
+import { Entry } from '../storage/typeEntry';
 import { colors } from '../styles/global';
 import MacroCard from './MacroCard';
 
