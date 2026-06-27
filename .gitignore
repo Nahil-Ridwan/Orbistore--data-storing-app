@@ -22,7 +22,7 @@ expo-env.d.ts
 .metro-health-check*
 
 #firebase
-./src/storage/firebaseConfig.ts
+firebaseConfig.ts
 
 # debug
 npm-debug.*
