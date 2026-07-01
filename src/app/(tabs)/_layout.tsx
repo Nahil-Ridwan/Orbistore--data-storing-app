@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetworkToast from '../../components/NetworkToast';
-import { getEntries } from '../../storage/coreCrud';
+import { getEntries } from '../../storage/helpers';
 import { subscribeToEntries } from '../../storage/subscription';
 import { Entry } from '../../storage/typeEntry';
 import { colors } from '../../styles/global';
