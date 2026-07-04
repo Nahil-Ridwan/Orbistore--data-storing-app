@@ -38,6 +38,7 @@ export default function RecentEntries({ entries }: RecentEntryProps) {
               sim={entry.sim}
               imei={entry.imei}
               note={entry.note}
+              address={entry.address}
               renewal1={entry.renewal1}
               renewal2={entry.renewal2}
               renewal3={entry.renewal3}

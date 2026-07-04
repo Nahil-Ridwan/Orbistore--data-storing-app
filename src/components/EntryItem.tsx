@@ -8,46 +8,18 @@ import { colors } from '../styles/global';
 import ShareButton from './ShareButton';
 import SmsButton from './SmsButton';
 
-// ...EntryItemProps unchanged...
-type EntryItemProps = {
-  id: string;
-  company?: string;
-  device?: number;
-  username?: string;
-  mobile?: number;
-  vehicle?: string;
-  type?: string;
-  lock?: string;
-  devicemodel?: string;
-  installdate: string;
-  expdate?: string;
-  validity?: number;
-  status?: string;
-  payment?: string;
-  sim: number;
-  imei: number;
-  note?: string;
-  renewal1?: string;
-  renewal2?: string;
-  renewal3?: string;
-  renewal4?: string;
-  renewal5?: string;
-  createdAt: string;
-};
-
 
 export default React.memo(function EntryItem({
   
-  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
-}: EntryItemProps) {
-  console.log('EntryItem render', id);
+  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
+}: Entry) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+  const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
   
   useEffect(() => {
-  setEdited({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
-}, [id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
-  const entry: Entry = { id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
+  setEdited({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+}, [id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
+  const entry: Entry = { id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
 
   const handleLongPress = () => {
     Alert.alert('Delete Entry', `Are you sure you want to delete "${vehicle}"?`, [
@@ -135,11 +107,16 @@ export default React.memo(function EntryItem({
         <View style={styles.row}>
           <View style={styles.info}>
             <Text style={styles.name}>{vehicle}   <Text style={{ fontSize:15, color: isExpired(expdate)? '#ff4d4d' : '#4caf50' }}>{validity}</Text></Text>
-            <Text style={styles.macros}><Text style={{fontWeight:'600', color:'#bfbfd2'}}>{device}</Text> • {company}</Text>
+            <Text style={styles.macros}><Text style={{fontWeight:'600', color:'#bfbfd2'}}>{device}</Text> • <Text style={{fontWeight:'600', color:'#bfbfd2'}}>{company}</Text></Text>
             <Text style={styles.macros}><Text style={{ fontSize:14, fontWeight:'600', color:colors.text }}>{username}</Text> • <Text style={{ color: isExpired(expdate)? '#ff4d4d' : '#4caf50' }}>{expdate}</Text></Text>
           </View>
           <View style={styles.actions}>
-           <Text numberOfLines={1} style={{ fontSize:14, marginBottom:6, color: displayStatus?.toLowerCase().trim()==='active' ? '#4caf50' : displayStatus?.toLowerCase().trim()==='expired' ? '#ff4d4d' : '#a0a0b0' }}>
+           <Text numberOfLines={1} style={{ fontSize:15, fontWeight:600, marginBottom:6, color: 
+              displayStatus?.toLowerCase().trim()==='active' && payment?.toLowerCase().trim()==='received' ? '#4caf50' 
+            : displayStatus?.toLowerCase().trim()==='active' && payment?.toLowerCase().trim()!=='received' ? '#ff4d4d' 
+            : displayStatus?.toLowerCase().trim()==='expired' ? '#daca3c' 
+            : displayStatus?.toLowerCase().trim()==='deleted' ? '#cd66ef' 
+            : '#a0a0b0'}}>
             {displayStatus}</Text>
            <View style={styles.actionButtons}>
              <View style={{  marginTop:7 }}><SmsButton entry={entry} /></View>
@@ -171,6 +148,7 @@ export default React.memo(function EntryItem({
                   [['Renewal - 1', 'renewal1'], ['Renewal - 2', 'renewal2']],
                   [['Renewal - 3', 'renewal3'], ['Renewal - 4', 'renewal4']],
                   [['Renewal - 5', 'renewal5']],
+                  [['Address', 'address']],
                 ];
 
                 return rows.map((pair, idx) => (
@@ -213,14 +191,15 @@ export default React.memo(function EntryItem({
                           <TextInput
                             style={[
                               styles.fieldInput,
-                              ['username', 'status', 'mobile', 'vehicle', 'installdate'].includes(key) &&
+                              ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
                                 styles.highlightField,
                               key === 'note' && styles.noteInput,
+                              key === 'address' && styles.addressInput,
                             ]}
                             value={String(edited[key] ?? '')}
-                            autoCapitalize={key === 'note' ? 'sentences' : 'characters'}
-                            multiline={key === 'note'}
-                            textAlignVertical={key === 'note' ? 'top' : 'center'}
+                            autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
+                            multiline={['note', 'address'].includes(key)}
+                            textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
                             numberOfLines={5}
                             onChangeText={(val) =>
                               setEdited(prev => ({
@@ -292,7 +271,18 @@ checkboxstyle: {
   paddingTop: 10,
   paddingBottom: 10,
   textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
+  borderWidth:3,
+  borderColor:'#7a7ab4'
 },
+
+addressInput: {
+  
+  paddingTop: 13,
+  paddingBottom: 10,
+  minHeight:46,
+  textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
+},
+
 highlightField: {
   backgroundColor: colors.background,
 },

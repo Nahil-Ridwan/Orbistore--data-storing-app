@@ -27,10 +27,11 @@ export default function AddEntryScreen() {
   const [sim, setSim] = useState('');
   const [imei, setImei] = useState('');
   const [note, setNote] = useState('');
+  const [address, setAddress] = useState('');
 
   const handleAddEntry = async () => {
-  if (!sim || !imei) {
-    Alert.alert('Error', 'Please enter a sim and imei.');
+  if ( sim.length != 13 || !imei) {
+    Alert.alert('Error', 'Please enter a valid sim and imei.');
     return;
   }
 
@@ -78,7 +79,7 @@ export default function AddEntryScreen() {
   
 
   // rest unchanged...
-    console.log('saving:', { company, mobile, type, lock, installdate, note });
+    console.log('saving:', { company, mobile, type, lock, installdate, note, address });
 
     // Don't await this — Firestore's write promise only resolves once the
     // server confirms it, which won't happen while offline. The local
@@ -101,6 +102,7 @@ export default function AddEntryScreen() {
       sim: Number(sim),
       imei: Number(imei),
       note: note || 'Nil',
+      address: address || 'Nil',
     }).catch((err) => {
       console.error('Failed to add entry:', err);
       Alert.alert('Save failed', 'Your entry is saved locally and will sync once online.');
@@ -120,6 +122,7 @@ export default function AddEntryScreen() {
     setSim('');
     setImei('');
     setNote('');
+    setAddress('');
 
 
   };
@@ -176,10 +179,9 @@ export default function AddEntryScreen() {
           style={[styles.input, styles.rowInput]}
           placeholder='Username'
           placeholderTextColor={colors.textSecondary}
-          autoCapitalize='none'
-          autoCorrect= {false}
+          autoCapitalize='characters'
           value={username}
-          onChangeText={(text) => setUsername(text.toLowerCase())}
+          onChangeText={setUsername}
         />
 
       <TextInput
@@ -259,12 +261,23 @@ export default function AddEntryScreen() {
         />
       </View>
 
-        <TextInput
+      <TextInput
         style={[styles.input, styles.noteInput]}
         placeholder='Note'
         placeholderTextColor={colors.textSecondary}
         value={note}
         onChangeText={setNote}
+        multiline
+        numberOfLines={4}
+        textAlignVertical='top'
+      />
+
+      <TextInput
+        style={[styles.input, styles.noteInput]}
+        placeholder='Address'
+        placeholderTextColor={colors.textSecondary}
+        value={address}
+        onChangeText={setAddress}
         multiline
         numberOfLines={4}
         textAlignVertical='top'

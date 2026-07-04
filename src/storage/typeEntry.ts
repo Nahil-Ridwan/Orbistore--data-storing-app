@@ -16,6 +16,7 @@ export type Entry = {
   sim: number;
   imei: number;
   note?: string;
+  address?: string;
   renewal1?: string;
   renewal2?: string;
   renewal3?: string;

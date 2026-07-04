@@ -16,6 +16,7 @@ type Props = {
 export default function AllEntriesScreen({ entries, searchVisible, setSearchVisible }: Props) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [filterVehicle, setFilterVehicle] = useState('');
   const [filterCompany, setFilterCompany] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterPayment, setFilterPayment] = useState('');
@@ -28,6 +29,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => setDebouncedQuery(text), 300);
   };
+
 
   const handleClearAll = () => {
     Alert.alert('Clear All !', 'Delete all vehicles?', [
@@ -61,17 +63,21 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         String(entry.status ?? '').toLowerCase().includes(q) ||
         String(entry.payment ?? '').toLowerCase().includes(q) ||
         String(entry.note ?? '').toLowerCase().includes(q) ||
+        String(entry.address ?? '').toLowerCase().includes(q) ||
         String(entry.device ?? '').toLowerCase().includes(q) ||
         String(entry.mobile ?? '').toLowerCase().includes(q) ||
         String(entry.sim ?? '').toLowerCase().includes(q) ||
         String(entry.imei ?? '').toLowerCase().includes(q)
       );
+  
+      const matchesVehicle = !filterVehicle || String(entry.vehicle ?? '').toLowerCase().includes(filterVehicle.toLowerCase());
       const matchesCompany = !filterCompany || String(entry.company ?? '').toLowerCase().includes(filterCompany.toLowerCase());
       const matchesStatus = !filterStatus || String(entry.status ?? '').toLowerCase().includes(filterStatus.toLowerCase());
       const matchesPayment = !filterPayment || String(entry.payment ?? '').toLowerCase().includes(filterPayment.toLowerCase());
-      return matchesQuery && matchesCompany && matchesStatus && matchesPayment;
+      return matchesQuery && matchesVehicle && matchesCompany && matchesStatus && matchesPayment;
     });
-  }, [debouncedQuery, entries, filterCompany, filterStatus, filterPayment]);
+  }, [debouncedQuery, entries, filterVehicle, filterCompany, filterStatus, filterPayment]);
+
 
   const toggleSearch = () => {
     setSearchVisible(!searchVisible);
@@ -80,6 +86,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     setFilterCompany('');
     setFilterStatus('');
     setFilterPayment('');
+    setFilterVehicle('');
   };
 
   return (
@@ -118,6 +125,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
             sim={entry.sim}
             imei={entry.imei}
             note={entry.note}
+            address={entry.address}
             renewal1={entry.renewal1}
             renewal2={entry.renewal2}
             renewal3={entry.renewal3}
@@ -151,15 +159,25 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         </View>
 
         {searchVisible && (
-          <TextInput
-            style={styles.searchInput}
-            placeholder='Search Vehicles...'
-            placeholderTextColor={colors.textSecondary}
-            value={query}
-            onChangeText={handleSearch}
-            autoFocus
-          />
-        )}
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <TextInput
+              style={[styles.searchInput, { flex:2 }]}
+              placeholder='Search Vehicles...'
+              placeholderTextColor={colors.textSecondary}
+              value={query}
+              onChangeText={handleSearch}
+              autoFocus
+            />
+
+            <TextInput
+              style={[styles.searchInput, { flex:1 }]}
+              placeholder='Vehicle'
+              placeholderTextColor={colors.textSecondary}
+              value={filterVehicle}
+              onChangeText={setFilterVehicle}
+            />
+          </View>
+          )}
 
         {searchVisible && (
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
@@ -201,7 +219,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
 const styles = {
   searchInput: {
     backgroundColor: colors.surface,
-    color: colors.text,
+    color: '#ff4d4d',
     padding: 13,
     borderRadius: 10,
     fontSize: 15,

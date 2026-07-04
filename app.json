@@ -28,8 +28,8 @@
       ],
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/images/android-icon-foreground1.png",
-        "backgroundImage": "./assets/images/White.png"
+        "foregroundImage": "./assets/images/android-icon-foreground2.png",
+        "backgroundImage": "./assets/images/Orange.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
