@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { deleteEntry, updateEntry } from '../storage/coreCrud';
 import { syncStatuses } from '../storage/helpers';
 import { Entry } from '../storage/typeEntry';
@@ -125,14 +125,19 @@ export default React.memo(function EntryItem({
          </View>
         </View>
       </TouchableOpacity>
-
       <Modal visible={modalVisible} animationType='slide' transparent>
+        <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+  >
         <View style={styles.overlay}>
           <View style={styles.modal}>
             <View style={{flexDirection:'row', alignContent:'center', justifyContent:'space-between'}}>
               <Text style={styles.modalTitle}>Vehicle Details</Text>
               <Ionicons style={{ marginRight:4 }} onPress={() => setModalVisible(false)} name= 'close-outline' size={27} color={colors.primary} />
             </View>
+            
             <ScrollView>
               {(() => {
                 const rows: [string, keyof Entry][][] = [
@@ -223,7 +228,9 @@ export default React.memo(function EntryItem({
             </View>
           </View>
         </View>
+       </KeyboardAvoidingView>
       </Modal>
+   
     </>
   );
 })

@@ -53,7 +53,7 @@ export default function TabLayout() {
 }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}

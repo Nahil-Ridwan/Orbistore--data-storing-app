@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { addEntry } from '../../storage/coreCrud';
 import { colors, globalStyles } from '../../styles/global';
@@ -128,8 +131,10 @@ export default function AddEntryScreen() {
   };
 
   return (
-    <View style={globalStyles.container}>
-      
+    <KeyboardAvoidingView 
+    style={globalStyles.container}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView>
       <Text style={globalStyles.title}>Add Vehicle</Text>
 
       <View style={styles.row}>
@@ -287,8 +292,8 @@ export default function AddEntryScreen() {
       <TouchableOpacity style={styles.button} onPress={handleAddEntry}>
         <Text style={styles.buttonText}>Add Vehicle</Text>
       </TouchableOpacity>
-
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

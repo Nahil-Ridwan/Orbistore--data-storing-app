@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useMemo, useRef, useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import EntryItem from '../../components/EntryItem';
 import { clearAllEntries } from '../../storage/coreCrud';
 import { Entry } from '../../storage/typeEntry';
@@ -93,11 +93,12 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     <View style={{ flex: 1, backgroundColor: colors.background }}>
 
       {/* ---- Scrollable list — fills the FULL screen from the very top ---- */}
+      <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <FlashList
         key={searchVisible ? 'search-open' : 'search-closed'}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: 140,
+          paddingBottom: 70,
           // Push content down by the measured header height so items start below the header.
           // As items scroll up they pass behind the absolutely-positioned header.
           paddingTop: headerHeight + 10,
@@ -135,6 +136,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           />
         )}
       />
+      </KeyboardAvoidingView>
 
       {/* ---- Header — absolutely positioned so the list scrolls behind it ---- */}
       <View
