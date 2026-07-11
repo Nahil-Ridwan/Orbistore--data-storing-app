@@ -54,20 +54,20 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     return entries.filter((entry) => {
       const matchesQuery = !q || (
         String(entry.company ?? '').toLowerCase().includes(q) ||
+        String(entry.device ?? '').toLowerCase().includes(q) ||
         String(entry.username ?? '').toLowerCase().includes(q) ||
+        String(entry.mobile ?? '').toLowerCase().includes(q) ||
         String(entry.vehicle ?? '').toLowerCase().includes(q) ||
         String(entry.type ?? '').toLowerCase().includes(q) ||
         String(entry.lock ?? '').toLowerCase().includes(q) ||
         String(entry.installdate ?? '').toLowerCase().includes(q) ||
-        String(entry.expdate ?? '').toLowerCase().includes(q) ||
         String(entry.status ?? '').toLowerCase().includes(q) ||
         String(entry.payment ?? '').toLowerCase().includes(q) ||
-        String(entry.note ?? '').toLowerCase().includes(q) ||
-        String(entry.address ?? '').toLowerCase().includes(q) ||
-        String(entry.device ?? '').toLowerCase().includes(q) ||
-        String(entry.mobile ?? '').toLowerCase().includes(q) ||
         String(entry.sim ?? '').toLowerCase().includes(q) ||
-        String(entry.imei ?? '').toLowerCase().includes(q)
+        String(entry.imei ?? '').toLowerCase().includes(q) ||
+        String(entry.shipnum ?? '').toLowerCase().includes(q) ||
+        String(entry.note ?? '').toLowerCase().includes(q) ||
+        String(entry.address ?? '').toLowerCase().includes(q)
       );
   
       const matchesVehicle = !filterVehicle || String(entry.vehicle ?? '').toLowerCase().includes(filterVehicle.toLowerCase());
@@ -89,11 +89,16 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     setFilterVehicle('');
   };
 
+  
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
 
       {/* ---- Scrollable list — fills the FULL screen from the very top ---- */}
-      <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView 
+      style={{flex:1}} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'  
+      }>
       <FlashList
         key={searchVisible ? 'search-open' : 'search-closed'}
         contentContainerStyle={{
@@ -105,6 +110,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         }}
         data={filtered}
         keyExtractor={(entry) => String(entry.id)}
+        keyboardDismissMode='on-drag'
         ListEmptyComponent={<Text style={globalStyles.empty}>No entries found.</Text>}
         renderItem={({ item: entry }) => (
           <EntryItem
@@ -121,6 +127,8 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
             installdate={entry.installdate}
             expdate={entry.expdate}
             validity={entry.validity}
+            deviceage={entry.deviceage}
+            shipnum={entry.shipnum}
             status={entry.status}
             payment={entry.payment}
             sim={entry.sim}
@@ -163,7 +171,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         {searchVisible && (
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             <TextInput
-              style={[styles.searchInput, { flex:2 }]}
+              style={[styles.searchInput, { width:'65.91%' }]}
               placeholder='Search Vehicles...'
               placeholderTextColor={colors.textSecondary}
               value={query}
@@ -172,7 +180,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
             />
 
             <TextInput
-              style={[styles.searchInput, { flex:1 }]}
+              style={[styles.searchInput, { width:'31.6%' }]}
               placeholder='Vehicle'
               placeholderTextColor={colors.textSecondary}
               value={filterVehicle}

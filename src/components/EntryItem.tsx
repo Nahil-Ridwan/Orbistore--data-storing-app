@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { deleteEntry, updateEntry } from '../storage/coreCrud';
@@ -11,15 +12,16 @@ import SmsButton from './SmsButton';
 
 export default React.memo(function EntryItem({
   
-  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
+  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
 }: Entry) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+  const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+  const [editingField, setEditingField] = useState<keyof Entry | null>(null);
   
   useEffect(() => {
-  setEdited({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
-}, [id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
-  const entry: Entry = { id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
+  setEdited({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+}, [id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
+  const entry: Entry = { id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
 
   const handleLongPress = () => {
     Alert.alert('Delete Entry', `Are you sure you want to delete "${vehicle}"?`, [
@@ -72,6 +74,7 @@ export default React.memo(function EntryItem({
   };
 
     setModalVisible(false);
+setEditingField(null);
    
     try {
     await updateEntry(updatedEntry);
@@ -135,7 +138,7 @@ export default React.memo(function EntryItem({
           <View style={styles.modal}>
             <View style={{flexDirection:'row', alignContent:'center', justifyContent:'space-between'}}>
               <Text style={styles.modalTitle}>Vehicle Details</Text>
-              <Ionicons style={{ marginRight:4 }} onPress={() => setModalVisible(false)} name= 'close-outline' size={27} color={colors.primary} />
+              <Ionicons style={{ marginRight:4 }} onPress={() => {setModalVisible(false);setEditingField(null);}} name= 'close-outline' size={27} color={colors.primary} />
             </View>
             
             <ScrollView>
@@ -149,6 +152,7 @@ export default React.memo(function EntryItem({
                   [['Install Date', 'installdate']],
                   [['Exp Date', 'expdate'], ['Validity', 'validity']],
                   [['SIM', 'sim'],['IMEI', 'imei']],
+                  [['Shipment Number', 'shipnum'],['Device Age', 'deviceage']],
                   [['Note', 'note']],
                   [['Renewal - 1', 'renewal1'], ['Renewal - 2', 'renewal2']],
                   [['Renewal - 3', 'renewal3'], ['Renewal - 4', 'renewal4']],
@@ -162,59 +166,84 @@ export default React.memo(function EntryItem({
                       <View key={key} style={[styles.field, styles.fieldHalf]}>
                         <Text style={styles.label}>{label}</Text>
                         {key === 'payment' ? (
-                          <TouchableOpacity
-                            style={[
-                              styles.checkboxstyle,
-                              edited.payment === 'RECEIVED' && styles.checkboxChecked,
-                            ]}
-                            onPress={() =>
-                              Alert.alert(
-                                'Change Payment Status',
-                                `Mark as ${
-                                  edited.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED'
-                                }?`,
-                                [
-                                  { text: 'Cancel', style: 'cancel' },
-                                  {
-                                    text: 'Confirm',
-                                    onPress: () =>
-                                      setEdited(prev => ({
-                                        ...prev,
-                                        payment:
-                                          prev.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED',
-                                      })),
-                                  },
-                                ]
-                              )
-                            }
-                          >
-                            <Text style={styles.checkboxLabel}>
-                              {edited.payment === 'RECEIVED' ? 'RECEIVED' : 'NOT PAID'}
-                            </Text>
-                          </TouchableOpacity>
-                        ) : (
-                          <TextInput
-                            style={[
-                              styles.fieldInput,
-                              ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
-                                styles.highlightField,
-                              key === 'note' && styles.noteInput,
-                              key === 'address' && styles.addressInput,
-                            ]}
-                            value={String(edited[key] ?? '')}
-                            autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
-                            multiline={['note', 'address'].includes(key)}
-                            textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
-                            numberOfLines={5}
-                            onChangeText={(val) =>
-                              setEdited(prev => ({
-                                ...prev,
-                                [key]: val,
-                              }))
-                            }
-                            placeholderTextColor={colors.textSecondary}
-                          />
-                        )}
+  <TouchableOpacity
+    style={[
+      styles.checkboxstyle,
+      edited.payment === 'RECEIVED' && styles.checkboxChecked,
+    ]}
+    onPress={() =>
+      Alert.alert(
+        'Change Payment Status',
+        `Mark as ${edited.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED'}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Confirm',
+            onPress: () =>
+              setEdited(prev => ({
+                ...prev,
+                payment: prev.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED',
+              })),
+          },
+        ]
+      )
+    }
+  >
+    <Text style={styles.checkboxLabel}>
+      {edited.payment === 'RECEIVED' ? 'RECEIVED' : 'NOT PAID'}
+    </Text>
+  </TouchableOpacity>
+) : editingField === key ? (
+  <TextInput
+    style={[
+      styles.fieldInput,
+      ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
+        styles.highlightField,
+      key === 'note' && styles.noteInput,
+      key === 'address' && styles.addressInput,
+    ]}
+    value={String(edited[key] ?? '')}
+    autoFocus
+    autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
+    multiline={['note', 'address'].includes(key)}
+    textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
+    numberOfLines={5}
+    onChangeText={(val) =>
+      setEdited(prev => ({
+        ...prev,
+        [key]: val,
+      }))
+    }
+    onBlur={() => setEditingField(null)}
+    onSubmitEditing={() => setEditingField(null)}
+    placeholderTextColor={colors.textSecondary}
+  />
+) : (
+  <TouchableOpacity
+    style={[
+      styles.fieldInput,
+      styles.fieldDisplay,
+      ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
+        styles.highlightField,
+      key === 'note' && styles.noteInput,
+      key === 'address' && styles.addressInput,
+    ]}
+    activeOpacity={0.7}
+    onPress={() => setEditingField(key)}
+    onLongPress={async () => {
+      const val = String(edited[key] ?? '');
+      await Clipboard.setStringAsync(val);
+    }}
+  >
+    <Text
+      style={styles.fieldDisplayText}
+      numberOfLines={['note', 'address'].includes(key) ? undefined : 1}
+      
+    >
+      {String(edited[key] ?? '') || ' '}
+    </Text>
+  </TouchableOpacity>
+)}
                       </View>
                     ))}
                   </View>
@@ -299,10 +328,17 @@ highlightField: {
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },
   field: { marginBottom: 12 },
   label: { fontSize: 12, color: colors.textSecondary, marginBottom: 4 },
-  fieldInput: { backgroundColor: '#3e3e5c', color: colors.text, padding: 10, borderRadius: 8, fontSize: 15 },
+  fieldInput: { backgroundColor: '#3e3e5c', color: colors.text, paddingVertical: 10, paddingLeft: 10, borderRadius: 8, fontSize: 15 },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
   cancelButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: colors.background },
   cancelText: { color: colors.textSecondary, fontWeight: '600' },
   saveButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: colors.primary },
   saveText: { color: colors.background, fontWeight: '600' },
+  fieldDisplay: {
+  justifyContent: 'center',
+},
+fieldDisplayText: {
+  color: colors.text,
+  fontSize: 15,
+},
 });

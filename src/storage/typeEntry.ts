@@ -1,22 +1,11 @@
 export type Entry = {
+
+  // Non - searchable
   id: string;
-  company?: string;
-  device?: number;
-  username?: string;
-  mobile?: number;
-  vehicle?: string;
-  type?: string;
-  lock?: string;
-  devicemodel?: string;
-  installdate: string;
-  expdate?: string;
   validity?: number;
-  status?: string;
-  payment?: string;
-  sim: number;
-  imei: number;
-  note?: string;
-  address?: string;
+  deviceage?: number;
+  devicemodel?: string;
+  expdate?: string;
   renewal1?: string;
   renewal2?: string;
   renewal3?: string;
@@ -24,4 +13,21 @@ export type Entry = {
   renewal5?: string;
   createdAt: string;
   updatedAt?: string; // for cloud
+
+  // Searchable
+  company?: string; 
+  device?: number;
+  username?: string;
+  mobile?: number;
+  vehicle?: string;
+  type?: string;
+  lock?: string;
+  installdate: string;
+  status?: string;
+  payment?: string;
+  sim: number;
+  imei: number;
+  shipnum?: string;
+  note?: string;
+  address?: string;
 };

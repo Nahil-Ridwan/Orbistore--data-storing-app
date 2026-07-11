@@ -12,7 +12,7 @@ export default function MacroCard({
   color,
 }: MacroCardProps) {
   return (
-    <View style={[styles.card, { borderLeftColor: color }, { borderRightColor: color}]}>
+    <View style={[styles.card, { borderColor: color }]}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value}</Text>
     </View>

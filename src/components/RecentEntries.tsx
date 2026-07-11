@@ -33,6 +33,8 @@ export default function RecentEntries({ entries }: RecentEntryProps) {
               installdate={entry.installdate}
               expdate={entry.expdate}
               validity={entry.validity}
+              deviceage={entry.deviceage}
+              shipnum={entry.shipnum}
               status={entry.status}
               payment={entry.payment}
               sim={entry.sim}

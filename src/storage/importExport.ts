@@ -9,9 +9,10 @@ import {
   entriesRef,
   formatDate,
   formatDateOutput,
+  getAge,
   getEntries,
   getNextExpiry,
-  getValidityDays,
+  getValidity,
   isExpired,
   monthMap,
   parseAppDate
@@ -32,7 +33,7 @@ export const exportEntries = async (): Promise<void> => {
     Math.round((date.getTime() - new Date(Date.UTC(1899, 11, 30)).getTime()) / 86400000);
 
   const safeEntries = entries.map((e) => {
-    const row: any = { ...e, sim: String(e.sim), imei: String(e.imei), validity: getValidityDays(e.expdate) };
+    const row: any = { ...e, sim: String(e.sim), imei: String(e.imei), validity: getValidity(e.expdate), deviceage: getAge(e.installdate) };
     dateFields.forEach((field) => {
       const date = parseAppDate(e[field] as string);
       if (date) row[field] = toExcelSerial(date);

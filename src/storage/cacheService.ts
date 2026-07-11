@@ -21,7 +21,7 @@ export const writeCache = async (entries: Entry[]): Promise<void> => {
   try {
     // Strip computed `validity` before caching — it's always re-derived on
     // read so stale values don't persist in storage across days.
-    const stripped = entries.map(({ validity, ...rest }) => rest);
+    const stripped = entries.map(({ validity, deviceage, ...rest }) => rest);
     await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(stripped));
   } catch (err) {
     console.error('Failed to write AsyncStorage cache:', err);

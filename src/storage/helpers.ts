@@ -96,20 +96,30 @@ export const formatDate = (val?: any): string | undefined => {
   return undefined;
 };
 
-export const getValidityDays = (expdate?: string): number | undefined => {
-  const expDate = parseAppDate(expdate);
-  if (!expDate) return undefined;
+export const getValidity = (inputdate?: string): number | undefined => {
+  const inputDate = parseAppDate(inputdate);
+  if (!inputDate) return undefined;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  expDate.setHours(0, 0, 0, 0);
-  const diffMs = expDate.getTime() - today.getTime();
+  inputDate.setHours(0, 0, 0, 0);
+  const diffMs = inputDate.getTime() - today.getTime();
   return Math.round(diffMs / 86400000);
+};
+
+export const getAge = (inputdate?: string): number | undefined => {
+  const inputDate = parseAppDate(inputdate);
+  if (!inputDate) return undefined;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  inputDate.setHours(0, 0, 0, 0);
+  const diffMs = inputDate.getTime() - today.getTime();
+  return ( 0 - Math.round(diffMs / 86400000));
 };
 
 // ---- Sort helper (shared by both local and cloud paths) ----
  export const sortEntries = (entries: Entry[]): Entry[] =>
   entries
-    .map((e) => ({ ...e, validity: getValidityDays(e.expdate) }))
+    .map((e) => ({ ...e, validity: getValidity(e.expdate), deviceage: getAge(e.installdate) }))
     .sort((a, b) => (b.validity ?? -Infinity) - (a.validity ?? -Infinity));
 
 
