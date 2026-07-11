@@ -166,84 +166,84 @@ setEditingField(null);
                       <View key={key} style={[styles.field, styles.fieldHalf]}>
                         <Text style={styles.label}>{label}</Text>
                         {key === 'payment' ? (
-  <TouchableOpacity
-    style={[
-      styles.checkboxstyle,
-      edited.payment === 'RECEIVED' && styles.checkboxChecked,
-    ]}
-    onPress={() =>
-      Alert.alert(
-        'Change Payment Status',
-        `Mark as ${edited.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED'}?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Confirm',
-            onPress: () =>
-              setEdited(prev => ({
-                ...prev,
-                payment: prev.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED',
-              })),
-          },
-        ]
-      )
-    }
-  >
-    <Text style={styles.checkboxLabel}>
-      {edited.payment === 'RECEIVED' ? 'RECEIVED' : 'NOT PAID'}
-    </Text>
-  </TouchableOpacity>
-) : editingField === key ? (
-  <TextInput
-    style={[
-      styles.fieldInput,
-      ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
-        styles.highlightField,
-      key === 'note' && styles.noteInput,
-      key === 'address' && styles.addressInput,
-    ]}
-    value={String(edited[key] ?? '')}
-    autoFocus
-    autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
-    multiline={['note', 'address'].includes(key)}
-    textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
-    numberOfLines={5}
-    onChangeText={(val) =>
-      setEdited(prev => ({
-        ...prev,
-        [key]: val,
-      }))
-    }
-    onBlur={() => setEditingField(null)}
-    onSubmitEditing={() => setEditingField(null)}
-    placeholderTextColor={colors.textSecondary}
-  />
-) : (
-  <TouchableOpacity
-    style={[
-      styles.fieldInput,
-      styles.fieldDisplay,
-      ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
-        styles.highlightField,
-      key === 'note' && styles.noteInput,
-      key === 'address' && styles.addressInput,
-    ]}
-    activeOpacity={0.7}
-    onPress={() => setEditingField(key)}
-    onLongPress={async () => {
-      const val = String(edited[key] ?? '');
-      await Clipboard.setStringAsync(val);
-    }}
-  >
-    <Text
-      style={styles.fieldDisplayText}
-      numberOfLines={['note', 'address'].includes(key) ? undefined : 1}
-      
-    >
-      {String(edited[key] ?? '') || ' '}
-    </Text>
-  </TouchableOpacity>
-)}
+                          <TouchableOpacity
+                            style={[
+                              styles.checkboxstyle,
+                              edited.payment === 'RECEIVED' && styles.checkboxChecked,
+                            ]}
+                            onPress={() =>
+                              Alert.alert(
+                                'Change Payment Status',
+                                `Mark as ${edited.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED'}?`,
+                                [
+                                  { text: 'Cancel', style: 'cancel' },
+                                  {
+                                    text: 'Confirm',
+                                    onPress: () =>
+                                      setEdited(prev => ({
+                                        ...prev,
+                                        payment: prev.payment === 'RECEIVED' ? 'NOT PAID' : 'RECEIVED',
+                                      })),
+                                  },
+                                ]
+                              )
+                            }
+                          >
+                            <Text style={styles.checkboxLabel}>
+                              {edited.payment === 'RECEIVED' ? 'RECEIVED' : 'NOT PAID'}
+                            </Text>
+                          </TouchableOpacity>
+                        ) : editingField === key ? (
+                          <TextInput
+                            style={[
+                              styles.fieldInput,
+                              ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
+                                styles.highlightField,
+                              key === 'note' && styles.noteInput,
+                              key === 'address' && styles.addressInput,
+                            ]}
+                            value={String(edited[key] ?? '')}
+                            autoFocus
+                            autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
+                            multiline={['note', 'address'].includes(key)}
+                            textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
+                            numberOfLines={5}
+                            onChangeText={(val) =>
+                              setEdited(prev => ({
+                                ...prev,
+                                [key]: val,
+                              }))
+                            }
+                            onBlur={() => setEditingField(null)}
+                            onSubmitEditing={() => setEditingField(null)}
+                            placeholderTextColor={colors.textSecondary}
+                          />
+                        ) : (
+                          <TouchableOpacity
+                            style={[
+                              styles.fieldInput,
+                              styles.fieldDisplay,
+                              ['username', 'status', 'mobile', 'vehicle', 'installdate', 'note'].includes(key) &&
+                                styles.highlightField,
+                              key === 'note' && styles.noteInput,
+                              key === 'address' && styles.addressInput,
+                            ]}
+                            activeOpacity={0.7}
+                            onPress={() => setEditingField(key)}
+                            onLongPress={async () => {
+                              const val = String(edited[key] ?? '');
+                              await Clipboard.setStringAsync(val);
+                            }}
+                          >
+                            <Text
+                              style={styles.fieldDisplayText}
+                              numberOfLines={['note', 'address'].includes(key) ? undefined : 1}
+                              
+                            >
+                              {String(edited[key] ?? '') || ' '}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
                       </View>
                     ))}
                   </View>
