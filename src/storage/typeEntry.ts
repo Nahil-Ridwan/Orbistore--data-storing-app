@@ -16,6 +16,7 @@ export type Entry = {
 
   // Searchable
   company?: string; 
+  place?: string;
   device?: number;
   username?: string;
   mobile?: number;

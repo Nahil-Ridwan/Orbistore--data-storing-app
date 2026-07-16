@@ -23,6 +23,7 @@ export default function RecentEntries({ entries }: RecentEntryProps) {
               key={entry.id}
               id={entry.id}
               company={entry.company}
+              place={entry.place}
               device={entry.device}
               username={entry.username}
               mobile={entry.mobile}

@@ -54,6 +54,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     return entries.filter((entry) => {
       const matchesQuery = !q || (
         String(entry.company ?? '').toLowerCase().includes(q) ||
+        String(entry.place ?? '').toLowerCase().includes(q) ||
         String(entry.device ?? '').toLowerCase().includes(q) ||
         String(entry.username ?? '').toLowerCase().includes(q) ||
         String(entry.mobile ?? '').toLowerCase().includes(q) ||
@@ -117,6 +118,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
             key={entry.id}
             id={entry.id}
             company={entry.company}
+            place={entry.place}
             device={entry.device}
             username={entry.username}
             mobile={entry.mobile}
@@ -216,7 +218,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         )}
 
         {searchVisible && (
-          <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
+          <Text style={{ color: colors.alert, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
             Showing {filtered.length} vehicle{filtered.length !== 1 ? 's...' : '...'}
           </Text>
         )}
@@ -229,7 +231,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
 const styles = {
   searchInput: {
     backgroundColor: colors.surface,
-    color: '#ff4d4d',
+    color: colors.alert,
     padding: 13,
     borderRadius: 10,
     fontSize: 15,

@@ -37,7 +37,7 @@ export default function HomeScreen({ entries, openAllEntriesWithSearch, reload }
     <View style={{ flex: 1 }}>
       <ScrollView style={globalStyles.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={globalStyles.header}>
-          <Text style={globalStyles.title}>Orbitracker</Text>
+          <Text style={[globalStyles.title, {color:colors.primary}]}>Orbitracker</Text>
 
           <TouchableOpacity style={{ marginTop: 8, marginLeft: 55 }} onPress={handleImport}>
             <Ionicons name='cloud-download-outline' size={26} color={colors.primary} />

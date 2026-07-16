@@ -12,16 +12,16 @@ import SmsButton from './SmsButton';
 
 export default React.memo(function EntryItem({
   
-  id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
+  id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt,
 }: Entry) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [edited, setEdited] = useState<Entry>({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+  const [edited, setEdited] = useState<Entry>({ id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
   const [editingField, setEditingField] = useState<keyof Entry | null>(null);
   
   useEffect(() => {
-  setEdited({ id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
-}, [id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
-  const entry: Entry = { id, company, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
+  setEdited({ id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
+}, [id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt]);
+  const entry: Entry = { id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt };
 
   const handleLongPress = () => {
     Alert.alert('Delete Entry', `Are you sure you want to delete "${vehicle}"?`, [
@@ -141,11 +141,12 @@ setEditingField(null);
               <Ionicons style={{ marginRight:4 }} onPress={() => {setModalVisible(false);setEditingField(null);}} name= 'close-outline' size={27} color={colors.primary} />
             </View>
             
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator = {false}>
               {(() => {
                 const rows: [string, keyof Entry][][] = [
                   [['Device', 'device'], ['Status', 'status']],
-                  [['Company', 'company'], ['Payment', 'payment']],
+                  [['Company', 'company'], ['Place', 'place']],
+                  [['Payment', 'payment']],
                   [['Username', 'username'], ['Mobile', 'mobile']],
                   [['Vehicle', 'vehicle'], ['Type', 'type']],
                   [['Lock', 'lock'], ['Device Model', 'devicemodel']],

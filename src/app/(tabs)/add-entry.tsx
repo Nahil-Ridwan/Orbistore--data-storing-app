@@ -17,6 +17,7 @@ import { colors, globalStyles } from '../../styles/global';
 
 export default function AddEntryScreen() {
   const [company, setCompany] = useState('');
+  const [place, setPlace] = useState('');
   const [device, setDevice] = useState('');
   const [username, setUsername] = useState('');
   const [mobile, setMobile] = useState('');
@@ -82,7 +83,7 @@ export default function AddEntryScreen() {
   
 
   // rest unchanged...
-    console.log('saving:', { company, mobile, type, lock, installdate, note, address });
+    console.log('saving:', { company, place, mobile, type, lock, installdate, note, address });
 
     // Don't await this — Firestore's write promise only resolves once the
     // server confirms it, which won't happen while offline. The local
@@ -91,6 +92,7 @@ export default function AddEntryScreen() {
     // instead of blocking on network confirmation.
     addEntry({
       company: company || 'Nil',
+      place: place || 'Nil',
       device: Number(device) || 0,
       username: username || 'Nil',
       mobile: Number(mobile) || 0,
@@ -112,6 +114,7 @@ export default function AddEntryScreen() {
     });
 
     setCompany('');
+    setPlace('');
     setDevice('');
     setUsername('');
     setMobile('');
@@ -169,15 +172,24 @@ export default function AddEntryScreen() {
           value={company}
           onChangeText={setCompany}
         />
-         
-         <TouchableOpacity
-            style={[styles.checkboxstyle, styles.rowInput, payment && styles.checkboxChecked]}
-            onPress={() => setPayment(prev => !prev)}
-        >
-          <Text style={styles.checkboxLabel}>{payment? 'RECEIVED' : 'NOT PAID'}</Text>
-        </TouchableOpacity>
+
+        <TextInput
+          style={[styles.input, styles.rowInput]}
+          placeholder='Place'
+          placeholderTextColor={colors.textSecondary}
+          autoCapitalize='characters'
+          value={place}
+          onChangeText={setPlace}
+        />
 
       </View>
+
+      <TouchableOpacity
+            style={[styles.checkboxstyle, payment && styles.checkboxChecked]}
+            onPress={() => setPayment(prev => !prev)}
+          >
+            <Text style={styles.checkboxLabel}>{payment? 'RECEIVED' : 'NOT PAID'}</Text>
+          </TouchableOpacity>
 
       <View style={styles.row}>
       <TextInput
