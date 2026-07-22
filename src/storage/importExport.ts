@@ -3,11 +3,9 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { doc, writeBatch } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
-import { readCache, writeCache } from './cacheService';
-import { db } from './firebaseConfig';
 import {
   entriesRef,
-  formatDate,
+  formatDateimport,
   formatDateOutput,
   getAge,
   getEntries,
@@ -16,7 +14,9 @@ import {
   isExpired,
   monthMap,
   parseAppDate
-} from './helpers';
+} from '../utils/helpers';
+import { readCache, writeCache } from './cacheService';
+import { db } from './firebaseConfig';
 import { addPendingMutations, removePendingMutations, syncPendingMutations, } from './offlineMutation';
 import { notifySubscribers } from './subscription';
 import { Entry } from './typeEntry';
@@ -91,31 +91,31 @@ export const pickAndImportEntries = async (): Promise<void> => {
   const data = XLSX.utils.sheet_to_json<any>(sheet, { raw: true });
 
   const parsed: Entry[] = data.map((row) => {
-    const formattedInstalldate = formatDate(row.installdate) ?? row.installdate ?? '';
+    const formattedInstalldate = formatDateimport(row.installdate) ?? row.installdate ?? '';
 
-    const renewal1 = formatDate(row.renewal1);
-    const renewal2 = formatDate(row.renewal2);
-    const renewal3 = formatDate(row.renewal3);
-    const renewal4 = formatDate(row.renewal4);
-    const renewal5 = formatDate(row.renewal5);
+    const renewal1 = formatDateimport(row.renewal1);
+    const renewal2 = formatDateimport(row.renewal2);
+    const renewal3 = formatDateimport(row.renewal3);
+    const renewal4 = formatDateimport(row.renewal4);
+    const renewal5 = formatDateimport(row.renewal5);
 
     const latestRenewal = renewal5 || renewal4 || renewal3 || renewal2 || renewal1;
 
     const newExpdate = latestRenewal
       ? getNextExpiry(latestRenewal)
       : (() => {
-          if (!formattedInstalldate) return formatDate(row.expdate) ?? row.expdate;
+          if (!formattedInstalldate) return formatDateimport(row.expdate) ?? row.expdate;
           const parts = formattedInstalldate.split('-');
-          if (parts.length !== 3) return formatDate(row.expdate) ?? row.expdate;
+          if (parts.length !== 3) return formatDateimport(row.expdate) ?? row.expdate;
           const [dStr, mStr, yStr] = parts;
           const monthIndex = monthMap[mStr];
-          if (monthIndex === undefined) return formatDate(row.expdate) ?? row.expdate;
+          if (monthIndex === undefined) return formatDateimport(row.expdate) ?? row.expdate;
           const date = new Date(2000 + Number(yStr), monthIndex, Number(dStr));
           date.setFullYear(date.getFullYear() + 1);
           return formatDateOutput(date);
         })();
 
-    const expdate = newExpdate ?? formatDate(row.expdate) ?? row.expdate;
+    const expdate = newExpdate ?? formatDateimport(row.expdate) ?? row.expdate;
     const existingStatus = row.status?.toLowerCase().trim();
     const status =
       existingStatus === 'discontinued' || existingStatus === 'discontd'

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Orbitracker",
-    "slug": "orbistore2",
+    "slug": "orbistorewid",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,6 +12,8 @@
       "supportsTablet": true
     },
     "android": {
+      "minSdkVersion": 24,
+      "ndkVersion": "30.0.15729638",
       "softwareKeyboardLayoutMode": "resize",
       "intentFilters": [
         {
@@ -43,6 +45,24 @@
     "plugins": [
       "expo-router",
       [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "OrbitrackerWidget",
+              "label": "Quick Actions",
+              "minWidth": "100dp",
+              "minHeight": "50dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 1,
+              "description": "search and add entries",
+              "updatePeriodMillis": 86400000,
+              "resizeMode": "horizontal|vertical"
+            }
+          ]
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon1.png",
@@ -62,9 +82,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "f867059d-3c6b-46b6-b85a-97f1f5b560b1"
+        "projectId": "88dcc44b-49bf-48da-aa41-f45bb342d03a"
       }
     },
-    "owner": "seencodess-team"
+    "owner": "seencodes"
   }
 }

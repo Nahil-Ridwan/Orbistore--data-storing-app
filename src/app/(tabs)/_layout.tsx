@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetworkToast from '../../components/NetworkToast';
-import { getEntries } from '../../storage/helpers';
 import { subscribeToEntries } from '../../storage/subscription';
 import { Entry } from '../../storage/typeEntry';
 import { colors } from '../../styles/global';
+import { getEntries } from '../../utils/helpers';
 
 
 import AddEntryScreen from './add-entry';
@@ -46,6 +46,29 @@ export default function TabLayout() {
   setSearchVisible(true);
   goToTab(2); // AllEntriesScreen is page 0 in your PagerView
 };
+
+  // ── Deep link handler (called by both cold-start and warm-start paths) ──
+  const handleDeepLink = (url: string | null) => {
+    if (!url) return;
+    if (url.includes('add-entry')) {
+      goToTab(1);
+    } else if (url.includes('entries')) {
+      const hasSearch = url.includes('search=true');
+      if (hasSearch) setSearchVisible(true);
+      goToTab(2);
+    }
+  };
+
+  // Cold start: app was launched/opened via the widget deep link
+  useEffect(() => {
+    Linking.getInitialURL().then(handleDeepLink);
+  }, []);
+
+  // Warm start: app was already running in the background
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
   const unsubscribe = subscribeToEntries(setEntries);

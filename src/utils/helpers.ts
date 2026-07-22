@@ -1,8 +1,8 @@
 import { collection, doc, writeBatch } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
-import { readCache, writeCache } from './cacheService';
-import { db } from './firebaseConfig';
-import { Entry } from './typeEntry';
+import { readCache, writeCache } from '../storage/cacheService';
+import { db } from '../storage/firebaseConfig';
+import { Entry } from '../storage/typeEntry';
 
 
 // ---- Firestore collection reference ----
@@ -16,7 +16,7 @@ export const getEntries = async (): Promise<Entry[]> => {
 
 
 // ---- Shared date helpers ----
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+export const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 export const monthMap: Record<string, number> = {
   JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
@@ -46,7 +46,24 @@ export const isExpired = (dateStr?: string): boolean => {
   return date < new Date();
 };
 
-export const formatDate = (val?: any): string | undefined => {
+export const formatDate = (val?: string): string | undefined => {
+    if (!val) return '';
+    const parts = val.trim().split(/[\s-]+/);
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      const monthIndex = isNaN(Number(month))
+        ? monthMap[month.toUpperCase()]
+        : Number(month) - 1;
+      if (monthIndex === undefined || isNaN(monthIndex)) return val;
+      const date = new Date(2000 + Number(year), monthIndex, Number(day));
+      if (!isNaN(date.getTime())) {
+        return formatDateOutput(date)
+      }
+    }
+    return val;
+  };
+
+export const formatDateimport = (val?: any): string | undefined => {
   if (!val) return undefined;
 
   if (typeof val === 'number') {
@@ -57,6 +74,8 @@ export const formatDate = (val?: any): string | undefined => {
     }
   }
 
+
+  
   const str = String(val).trim();
 
   const slashParts = str.split('/');

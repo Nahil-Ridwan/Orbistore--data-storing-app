@@ -1,20 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { writeBatch } from 'firebase/firestore';
 import {
+  entriesRef,
+  formatDateimport,
+  formatDateOutput,
+  getNextExpiry,
+  isExpired,
+  monthMap
+} from '../utils/helpers';
+import {
   CACHE_KEY,
   readCache,
   removeCacheEntry,
   updateCacheEntry
 } from './cacheService';
 import { db } from './firebaseConfig';
-import {
-  entriesRef,
-  formatDate,
-  formatDateOutput,
-  getNextExpiry,
-  isExpired,
-  monthMap
-} from './helpers';
 import { addPendingMutation, PENDING_MUTATIONS_KEY, syncPendingMutations } from './offlineMutation';
 import { LAST_SYNC_KEY, notifySubscribers } from './subscription';
 import { Entry } from './typeEntry';
@@ -60,7 +60,7 @@ export const addEntry = async (
 };
 
 export const updateEntry = async (updated: Entry): Promise<void> => {
-  const formattedInstalldate = formatDate(updated.installdate) ?? updated.installdate;
+  const formattedInstalldate = formatDateimport(updated.installdate) ?? updated.installdate;
 
   const latestRenewal =
     updated.renewal5 || updated.renewal4 || updated.renewal3 ||

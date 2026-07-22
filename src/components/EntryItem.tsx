@@ -3,9 +3,9 @@ import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { deleteEntry, updateEntry } from '../storage/coreCrud';
-import { syncStatuses } from '../storage/helpers';
 import { Entry } from '../storage/typeEntry';
 import { colors } from '../styles/global';
+import { formatDate, isExpired, syncStatuses } from '../utils/helpers';
 import ShareButton from './ShareButton';
 import SmsButton from './SmsButton';
 
@@ -30,39 +30,8 @@ export default React.memo(function EntryItem({
     ]);
   };
 
-
-  const monthMap: Record<string, number> = {
-  JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5,
-  JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11,
-  };
-
   const handleSave = async () => {
 
-  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-
-  const formatDateOutput = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = MONTHS[date.getMonth()];
-    const year = String(date.getFullYear()).slice(-2);
-  return `${day}-${month}-${year}`;
-};
-
-  const formatDate = (val?: string): string | undefined => {
-    if (!val) return val;
-    const parts = val.trim().split(/[\s-]+/);
-    if (parts.length === 3) {
-      const [day, month, year] = parts;
-      const monthIndex = isNaN(Number(month))
-        ? monthMap[month.toUpperCase()]
-        : Number(month) - 1;
-      if (monthIndex === undefined || isNaN(monthIndex)) return val;
-      const date = new Date(2000 + Number(year), monthIndex, Number(day));
-      if (!isNaN(date.getTime())) {
-        return formatDateOutput(date)
-      }
-    }
-    return val;
-  };
 
   const updatedEntry = {
     ...edited,
@@ -85,16 +54,6 @@ setEditingField(null);
   }
 };
 
-  
-
-  const isExpired = (dateStr?: string) => {
-    if (!dateStr) return false;
-    const [day, month, year] = dateStr.split('-');
-    const monthIndex = monthMap[month];
-    if (monthIndex === undefined) return false;
-    const expDate = new Date(2000 + Number(year), monthIndex, Number(day));
-    return expDate < new Date();
-  };
 
   const displayStatus = (() => {
   if (!expdate) return status;
