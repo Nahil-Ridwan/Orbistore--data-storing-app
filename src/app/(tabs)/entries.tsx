@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Animated, { LinearTransition, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import EntryItem from '../../components/EntryItem';
 import { clearAllEntries } from '../../storage/coreCrud';
 import { Entry } from '../../storage/typeEntry';
@@ -149,8 +150,9 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
       </KeyboardAvoidingView>
 
       {/* ---- Header — absolutely positioned so the list scrolls behind it ---- */}
-      <View
+      <Animated.View
         style={styles.header}
+        layout={LinearTransition}
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
       >
         <View style={globalStyles.header}>
@@ -171,7 +173,11 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         </View>
 
         {searchVisible && (
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+          <Animated.View
+            entering={ZoomIn.duration(200)} //zoomin
+            exiting={ZoomOut.duration(150)}
+            style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}
+          >
             <TextInput
               style={[styles.searchInput, { width:'65.91%' }]}
               placeholder='Search Vehicles...'
@@ -188,11 +194,15 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
               value={filterVehicle}
               onChangeText={setFilterVehicle}
             />
-          </View>
+          </Animated.View>
           )}
 
         {searchVisible && (
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+          <Animated.View
+            entering={ZoomIn.duration(200)} // flipinx stretchx
+            exiting={ZoomOut.duration(150)}
+            style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}
+          >
             <TextInput
               style={[styles.searchInput, { flex: 1, marginTop: 0 }]}
               placeholder='Company'
@@ -214,16 +224,18 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
               value={filterPayment}
               onChangeText={setFilterPayment}
             />
-          </View>
+          </Animated.View>
         )}
 
         {searchVisible && (
-          <Text style={{ color: colors.alert, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
-            Showing {filtered.length} vehicle{filtered.length !== 1 ? 's...' : '...'}
-          </Text>
-        )}
-      </View>
-
+            <Animated.Text 
+             entering={ZoomIn.duration(200)} // flipinx stretchx
+             exiting={ZoomOut.duration(150)}
+             style={{ color: colors.alert, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
+               Showing {filtered.length} vehicle{filtered.length !== 1 ? 's...' : '...'}
+            </Animated.Text>
+        )}        
+      </Animated.View>
     </View>
   );
 }
@@ -248,6 +260,6 @@ const styles = {
     paddingHorizontal: 20,
     paddingBottom: 8,
     zIndex: 10,
-    elevation: 10,
+    
   },
 };

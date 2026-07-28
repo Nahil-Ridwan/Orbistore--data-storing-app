@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { addEntry } from '../../storage/coreCrud';
 import { colors, globalStyles } from '../../styles/global';
-import { formatDate, formatDateOutput, monthMap } from '../../utils/helpers';
+import { formatDate, formatDateOutput, monthMap } from '../../utility/helpers';
 
 
 
@@ -108,7 +108,7 @@ export default function AddEntryScreen() {
     <KeyboardAvoidingView 
     style={globalStyles.container}
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={globalStyles.title}>Add Vehicle</Text>
 
       <View style={styles.row}>
@@ -302,6 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 24,
+    marginBottom: 95
   },
   buttonText: {
     color: colors.background,

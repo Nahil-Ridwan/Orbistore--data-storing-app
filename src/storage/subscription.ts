@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { onSnapshot, query, where } from 'firebase/firestore';
 import { AppState, AppStateStatus } from 'react-native';
-import { entriesRef, sortEntries } from '../utils/helpers';
+import { entriesRef, sortEntries } from '../utility/helpers';
 import { readCache, writeCache } from './cacheService';
 import { syncPendingMutations } from './offlineMutation';
 import { Entry } from './typeEntry';

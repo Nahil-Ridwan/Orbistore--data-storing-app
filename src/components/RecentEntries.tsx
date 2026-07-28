@@ -3,21 +3,19 @@ import { Entry } from '../storage/typeEntry';
 import EntryItem from './EntryItem';
 
 
-
-
 type RecentEntryProps = {
   entries: Entry[];
 };
 
 export default function RecentEntries({ entries }: RecentEntryProps) {
   return (
-    <View style={{ marginTop: 30 }}>
+    <View style={{ marginTop: 21, paddingBottom:100 }}>
       <Text style={styles.sectionTitle}>Recent Vehicles</Text>
       {entries.length === 0 ? (
         <Text style={styles.empty}>No entries logged yet.</Text>
       ) : (
         entries
-          .slice(0, 4)
+          .slice(0, 10)
           .map((entry) => (
             <EntryItem
               key={entry.id}

@@ -5,7 +5,7 @@ import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, T
 import { deleteEntry, updateEntry } from '../storage/coreCrud';
 import { Entry } from '../storage/typeEntry';
 import { colors } from '../styles/global';
-import { formatDate, isExpired, syncStatuses } from '../utils/helpers';
+import { formatDate, isExpired, syncStatuses } from '../utility/helpers';
 import ShareButton from './ShareButton';
 import SmsButton from './SmsButton';
 

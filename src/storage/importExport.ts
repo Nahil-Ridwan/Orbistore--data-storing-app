@@ -4,17 +4,17 @@ import * as Sharing from 'expo-sharing';
 import { doc, writeBatch } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import {
-  entriesRef,
-  formatDateimport,
-  formatDateOutput,
-  getAge,
-  getEntries,
-  getNextExpiry,
-  getValidity,
-  isExpired,
-  monthMap,
-  parseAppDate
-} from '../utils/helpers';
+    entriesRef,
+    formatDateimport,
+    formatDateOutput,
+    getAge,
+    getEntries,
+    getNextExpiry,
+    getValidity,
+    isExpired,
+    monthMap,
+    parseAppDate
+} from '../utility/helpers';
 import { readCache, writeCache } from './cacheService';
 import { db } from './firebaseConfig';
 import { addPendingMutations, removePendingMutations, syncPendingMutations, } from './offlineMutation';

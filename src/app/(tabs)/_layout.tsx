@@ -8,7 +8,7 @@ import NetworkToast from '../../components/NetworkToast';
 import { subscribeToEntries } from '../../storage/subscription';
 import { Entry } from '../../storage/typeEntry';
 import { colors } from '../../styles/global';
-import { getEntries } from '../../utils/helpers';
+import { getEntries } from '../../utility/helpers';
 
 
 import AddEntryScreen from './add-entry';
@@ -41,6 +41,7 @@ export default function TabLayout() {
   };
 
   const [searchVisible, setSearchVisible] = useState(false);
+
  
   const openAllEntriesWithSearch = () => {
   setSearchVisible(true);
