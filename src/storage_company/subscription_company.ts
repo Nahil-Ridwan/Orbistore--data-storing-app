@@ -1,32 +1,53 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { onSnapshot, query, where } from 'firebase/firestore';
 import { AppState, AppStateStatus } from 'react-native';
-import { entriesRef, sortEntries } from '../utility/helpers';
-import { readCache, writeCache } from './cacheService';
-import { syncPendingMutations } from './offlineMutation';
-import { Entry } from './typeEntry';
+import { readCache } from '../storage_entry/cacheService';
+import { companiesRef, sortCompanies, sortCompaniesWithEntries } from '../utility/helpers';
+import { readCompanyCache, writeCompanyCache } from './cacheService_company';
+import { syncPendingCompanyMutations } from './offlineMutation_company';
+import { Company } from './typeCompany';
 
-export const LAST_SYNC_KEY = 'last_sync_ts';
+export const LAST_SYNC_KEY = 'last_sync_ts_company';
 
 // How far back (in ms) to roll lastSync when rebuilding the listener.
 // This ensures we never miss a write from another device due to:
 //   - Clock skew between devices
 //   - The brief window while the app was transitioning to foreground
 //   - Firestore delivery latency on onSnapshot reconnect
-const SAFE_OVERLAP_MS = 2 * 60 * 1000; // 2 minutes
+const SAFE_OVERLAP_MS = 5 * 1000; // 5 seconds
 
 // ---- Active Subscribers for Local-First Updates ----
-export const subscribers = new Set<(entries: Entry[]) => void>();
+export const subscribers_company = new Set<(companies: Company[]) => void>();
 
-export const notifySubscribers = (entries: Entry[]) => {
-  const sorted = sortEntries(entries);
-  subscribers.forEach((cb) => {
-    try {
-      cb(sorted);
-    } catch (err) {
-      console.error('Error notifying subscriber:', err);
-    }
-  });
+// Notify subscribers with pre-sorted companies.
+// Callers that already have entries in memory should pass them to avoid a
+// redundant disk read.  If omitted, falls back to a full sortCompanies() call.
+export const notifyCompanySubscribers = (
+  companies: Company[],
+  entries?: import('../storage_entry/typeEntry').Entry[]
+) => {
+  const doNotify = (sorted: Company[]) => {
+    subscribers_company.forEach((cb) => {
+      try {
+        cb(sorted);
+      } catch (err) {
+        console.error('Error notifying subscriber:', err);
+      }
+    });
+  };
+
+  if (entries !== undefined) {
+    // Synchronous path — entries already in memory, no disk read needed.
+    doNotify(sortCompaniesWithEntries(companies, entries));
+  } else {
+    // Async fallback — read entries from disk then sort.
+    sortCompanies(companies)
+      .then(doNotify)
+      .catch((err) => {
+        console.error('Error sorting companies:', err);
+        doNotify(companies);
+      });
+  }
 };
 
 // ---- Internal listener state ----
@@ -40,84 +61,89 @@ let _currentUnsubscribe: (() => void) | null = null;
 // doc updated since `fromDate`, merges results into the local cache, and
 // notifies subscribers.  Returns an unsubscribe function.
 const setupListener = (fromDate: Date): (() => void) => {
-  // Roll back by the safe overlap so we always catch writes that may have
-  // landed just before our last lastSync timestamp, or while the app was
-  // transitioning back to the foreground.
   const safeFrom = new Date(fromDate.getTime() - SAFE_OVERLAP_MS);
 
   const entriesQuery = query(
-    entriesRef,
-    where('updatedAt', '>', safeFrom.toISOString())
+    companiesRef,
+    where('companyupdatedAt', '>', safeFrom.toISOString())
   );
 
-  // Track the latest updatedAt we've seen in this listener session.
-  // We persist this (minus the overlap buffer) as the new lastSync so the
-  // NEXT listener session starts from a known-good timestamp.
   let sessionLatest: Date = fromDate;
 
   const unsub = onSnapshot(entriesQuery, async (snap) => {
     if (snap.empty && !snap.metadata.hasPendingWrites) {
+      await AsyncStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
       return;
     }
 
-    console.log('SYNCED ENTRIES FROM CLOUD:', snap.docs.length);
+    console.log('SYNCED COMPANIES FROM CLOUD:', snap.docs.length);
 
     let changed = false;
 
     // Always read the freshest cache to avoid overwriting concurrent local writes.
-    const currentCache = await readCache();
+    const currentCache = await readCompanyCache();
     const updatedCache = [...currentCache];
 
-    for (const docSnap of snap.docs) {
-      const entry = docSnap.data() as Entry & { deleted?: boolean };
+    const indexMap = new Map<string, number>();
+    for (let i = 0; i < updatedCache.length; i++) {
+      indexMap.set(updatedCache[i].companyid, i);
+    }
 
-      // Track the highest updatedAt we've seen so we can advance lastSync.
-      if (entry.updatedAt) {
-        const entryTime = new Date(entry.updatedAt);
-        if (entryTime > sessionLatest) {
+    for (const docSnap of snap.docs) {
+      const entry = docSnap.data() as Company & { deleted?: boolean };
+
+      if (entry.companyupdatedAt) {
+        const entryTime = new Date(entry.companyupdatedAt);
+        if (!isNaN(entryTime.getTime()) && entryTime > sessionLatest) {
           sessionLatest = entryTime;
         }
       }
 
-      const index = updatedCache.findIndex((e) => e.id === entry.id);
+      const index = indexMap.get(entry.companyid);
 
       if (entry.deleted) {
         // Soft-deleted on another device — purge from local cache.
-        if (index > -1) {
+        if (index !== undefined && index > -1) {
           updatedCache.splice(index, 1);
+          indexMap.clear();
+          for (let i = 0; i < updatedCache.length; i++) {
+            indexMap.set(updatedCache[i].companyid, i);
+          }
           changed = true;
         }
       } else {
-        if (index > -1) {
+        if (index !== undefined && index > -1) {
           // Only overwrite if the cloud version is strictly newer (last-write-wins).
           const local = updatedCache[index];
-          if (
-            !local.updatedAt ||
-            !entry.updatedAt ||
-            new Date(entry.updatedAt) > new Date(local.updatedAt)
-          ) {
+          const localUpdated = local.companyupdatedAt || '';
+          const remoteUpdated = entry.companyupdatedAt || '';
+          if (!localUpdated || !remoteUpdated || remoteUpdated > localUpdated) {
             updatedCache[index] = entry;
             changed = true;
           }
         } else {
           // New entry from another device — add to local cache.
           updatedCache.push(entry);
+          indexMap.set(entry.companyid, updatedCache.length - 1);
           changed = true;
         }
       }
     }
 
     if (changed) {
-      await writeCache(updatedCache);
-      notifySubscribers(updatedCache);
+      await writeCompanyCache(updatedCache);
+      // Read entries once so notifyCompanySubscribers can sort synchronously
+      // instead of hitting the disk again for every company update.
+      try {
+        const currentEntries = await readCache();
+        notifyCompanySubscribers(updatedCache, currentEntries);
+      } catch {
+        notifyCompanySubscribers(updatedCache);
+      }
     }
 
-    // Persist the new lastSync (minus the overlap buffer) so the next
-    // listener session starts from just before where we left off.
-    if (sessionLatest > fromDate) {
-      const persistTime = new Date(sessionLatest.getTime() - SAFE_OVERLAP_MS);
-      await AsyncStorage.setItem(LAST_SYNC_KEY, persistTime.toISOString());
-    }
+    const syncToSave = sessionLatest > fromDate ? sessionLatest : new Date();
+    await AsyncStorage.setItem(LAST_SYNC_KEY, syncToSave.toISOString());
   });
 
   return unsub;
@@ -134,10 +160,10 @@ const resolveLastSync = async (): Promise<Date> => {
 
   // No saved timestamp yet — warm up from the newest entry in the local cache
   // so we don't redundantly download everything on first launch.
-  const currentCache = await readCache();
+  const currentCache = await readCompanyCache();
   let maxTime = new Date(0);
   for (const entry of currentCache) {
-    const tStr = entry.updatedAt || entry.createdAt;
+    const tStr = entry.companyupdatedAt || entry.companycreatedAt;
     if (tStr) {
       const t = new Date(tStr);
       if (t > maxTime) maxTime = t;
@@ -171,16 +197,25 @@ const resolveLastSync = async (): Promise<Date> => {
 //     other subscribers may still be active.  The actual Firestore listener
 //     is torn down only when ALL subscribers are gone.
 
-export const subscribeToEntries = (callback: (entries: Entry[]) => void) => {
-  subscribers.add(callback);
+export const subscribeToCompanies = (callback: (companies: Company[]) => void) => {
+  subscribers_company.add(callback);
 
   // Step 1: serve cache immediately so the UI renders without a loading state.
-  readCache().then((cached) => {
-    if (cached.length > 0) callback(sortEntries(cached));
-  });
+  // We read entries in parallel with companies so sorting is synchronous.
+  Promise.all([readCompanyCache(), readCache()])
+    .then(([cached, entries]) => {
+      if (cached.length > 0) {
+        callback(sortCompaniesWithEntries(cached, entries));
+      }
+    })
+    .catch(() => {
+      readCompanyCache().then((cached) => {
+        if (cached.length > 0) callback(cached);
+      });
+    });
 
   // Step 2: flush any queued offline mutations now that we (might) be online.
-  syncPendingMutations().catch((err) =>
+  syncPendingCompanyMutations().catch((err) =>
     console.error('Initial launch sync failed:', err)
   );
 
@@ -201,7 +236,7 @@ export const subscribeToEntries = (callback: (entries: Entry[]) => void) => {
 
     AppState.addEventListener('change', async (nextState: AppStateStatus) => {
       if (nextState === 'active') {
-        console.log('App foregrounded — rebuilding Firestore listener for cross-device sync');
+        console.log('App foregrounded — rebuilding Firestore listener for cross-device sync - company');
 
         // Tear down the stale listener.
         if (_currentUnsubscribe) {
@@ -210,7 +245,7 @@ export const subscribeToEntries = (callback: (entries: Entry[]) => void) => {
         }
 
         // Flush any mutations queued while we were in the background.
-        syncPendingMutations().catch((err) =>
+        syncPendingCompanyMutations().catch((err) =>
           console.error('Foreground sync failed:', err)
         );
 
@@ -222,17 +257,16 @@ export const subscribeToEntries = (callback: (entries: Entry[]) => void) => {
   }
 
   return () => {
-    subscribers.delete(callback);
+    subscribers_company.delete(callback);
 
     // If no more subscribers, tear down the Firestore listener entirely to
     // avoid unnecessary reads (e.g. when navigating away in tests or storybook).
-    if (subscribers.size === 0 && _currentUnsubscribe) {
+    if (subscribers_company.size === 0 && _currentUnsubscribe) {
       _currentUnsubscribe();
       _currentUnsubscribe = null;
     }
   };
 };
-
 // Module-level flag — ensures we only ever register ONE AppState listener
 // no matter how many times subscribeToEntries is called.
 let _appStateListenerRegistered = false;

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { writeBatch } from 'firebase/firestore';
+import { db } from '../utility/firebaseConfig';
 import {
   entriesRef,
   formatDateimport,
@@ -14,9 +15,8 @@ import {
   removeCacheEntry,
   updateCacheEntry
 } from './cacheService';
-import { db } from './firebaseConfig';
 import { addPendingMutation, PENDING_MUTATIONS_KEY, syncPendingMutations } from './offlineMutation';
-import { LAST_SYNC_KEY, notifySubscribers } from './subscription';
+import { LAST_SYNC_KEY, notifySubscribers, syncCompanyCounts } from './subscription';
 import { Entry } from './typeEntry';
 
 
@@ -34,7 +34,7 @@ export const addEntry = async (
     status = isExpired(entry.expdate) ? 'EXPIRED' : 'ACTIVE';
   }
 
-  const id = Date.now().toString();
+  const id = Date.now().toString() + Math.random().toString(36).slice(2, 7);
   const newEntry: Entry = {
     ...entry,
     status,
@@ -47,6 +47,7 @@ export const addEntry = async (
   await updateCacheEntry(newEntry);
   const cached = await readCache();
   notifySubscribers(cached);
+  await syncCompanyCounts(cached);
 
   // Add to pending mutations queue
   await addPendingMutation(id, 'UPSERT', newEntry);
@@ -58,6 +59,8 @@ export const addEntry = async (
 
   return newEntry;
 };
+
+
 
 export const updateEntry = async (updated: Entry): Promise<void> => {
   const formattedInstalldate = formatDateimport(updated.installdate) ?? updated.installdate;
@@ -102,6 +105,7 @@ export const updateEntry = async (updated: Entry): Promise<void> => {
   await updateCacheEntry(finalEntry);
   const cached = await readCache();
   notifySubscribers(cached);
+  await syncCompanyCounts(cached);
 
   // Add to pending mutations queue
   await addPendingMutation(finalEntry.id, 'UPSERT', finalEntry);
@@ -117,6 +121,7 @@ export const deleteEntry = async (id: string): Promise<void> => {
   await removeCacheEntry(id);
   const cached = await readCache();
   notifySubscribers(cached);
+  await syncCompanyCounts(cached);
 
   // Add to pending mutations queue
   await addPendingMutation(id, 'DELETE');
@@ -133,6 +138,7 @@ export const clearAllEntries = async (): Promise<void> => {
   await AsyncStorage.removeItem(LAST_SYNC_KEY);
   await AsyncStorage.removeItem(PENDING_MUTATIONS_KEY);
   notifySubscribers([]);
+  await syncCompanyCounts([]);
 
   // Batch-delete from Firestore.
   const { getDocs: _getDocs } = await import('firebase/firestore');

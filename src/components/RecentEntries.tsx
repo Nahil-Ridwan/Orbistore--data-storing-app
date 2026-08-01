@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { Entry } from '../storage/typeEntry';
+import { Entry } from '../storage_entry/typeEntry';
 import EntryItem from './EntryItem';
 
 
@@ -10,7 +10,7 @@ type RecentEntryProps = {
 export default function RecentEntries({ entries }: RecentEntryProps) {
   return (
     <View style={{ marginTop: 21, paddingBottom:100 }}>
-      <Text style={styles.sectionTitle}>Recent Vehicles</Text>
+      <Text style={styles.sectionTitle}>Recent Devices</Text>
       {entries.length === 0 ? (
         <Text style={styles.empty}>No entries logged yet.</Text>
       ) : (

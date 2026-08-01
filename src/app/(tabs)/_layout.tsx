@@ -5,12 +5,13 @@ import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetworkToast from '../../components/NetworkToast';
-import { subscribeToEntries } from '../../storage/subscription';
-import { Entry } from '../../storage/typeEntry';
+import { subscribeToCompanies } from '../../storage_company/subscription_company';
+import { subscribeToEntries } from '../../storage_entry/subscription';
+import { Entry } from '../../storage_entry/typeEntry';
 import { colors } from '../../styles/global';
-import { getEntries } from '../../utility/helpers';
+import { getCompanies, getEntries } from '../../utility/helpers';
 
-
+import { Company } from '@/src/storage_company/typeCompany';
 import AddEntryScreen from './add-entry';
 import AllEntriesScreen from './entries';
 import HomeScreen from './index';
@@ -28,12 +29,21 @@ export default function TabLayout() {
   const pagerRef = useRef<PagerView>(null);
 
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   const loadEntries = async () => {
   const data = await getEntries();
   console.log('LOAD ENTRIES', data.length);
-  setEntries(data);
-};
+  setEntries(data);  
+  };
+
+  // for company
+  const loadCompanies = async () => {
+  const data = await getCompanies();
+  console.log('LOAD COMPANIES', data.length);
+  setCompanies(data);  
+  };
+
 
   const goToTab = (index: number) => {
     setActiveTab(index);
@@ -76,6 +86,11 @@ export default function TabLayout() {
   return () => unsubscribe();
 }, []);
 
+  useEffect(() => {
+  const unsubscribe = subscribeToCompanies(setCompanies);
+  return () => unsubscribe();
+}, []);
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <PagerView
@@ -85,14 +100,15 @@ export default function TabLayout() {
         onPageSelected={(e) => setActiveTab(e.nativeEvent.position)}
       >
         <View key="0" style={{ flex: 1 }}><HomeScreen 
-         reload={loadEntries}
+         reload={() => {loadEntries(); loadCompanies()}}
          openAllEntriesWithSearch={openAllEntriesWithSearch}
          entries={entries}/></View>
         <View key="1" style={{ flex: 1 }}><AddEntryScreen/></View>
         <View key="2" style={{ flex: 1 }}><AllEntriesScreen
          searchVisible={searchVisible} 
          setSearchVisible={setSearchVisible} 
-         entries={entries}/></View>
+         entries={entries}
+         companies={companies}/></View>
         
         
         

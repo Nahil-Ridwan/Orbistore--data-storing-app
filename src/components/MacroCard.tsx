@@ -13,8 +13,9 @@ export default function MacroCard({
 }: MacroCardProps) {
   return (
     <View style={[styles.card, { borderColor: color }]}>
-      <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value}</Text>
+      <Text style={styles.label}>{label}</Text>
+      
     </View>
   );
 }
@@ -23,19 +24,24 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#16213e',
     borderRadius: 12,
-    padding: 16,
     width: '100%',
     borderLeftWidth: 4,
     borderRightWidth: 4,
+    marginTop:34,
   },
   label: {
-    fontSize: 18,
-    color: '#a0a0b0',
+    fontSize: 35,
+    color: 'hsl(0, 0%, 87%)',
+    fontWeight: 600,
+    marginTop:-11,
+    marginLeft: 17,
+    marginBottom: 10
   },
   value: {
-    fontSize: 38,
+    fontSize: 50,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: 'hsl(0, 0%, 96%)',
     marginTop: 4,
+    marginLeft: 18
   },
 });

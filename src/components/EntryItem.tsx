@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { deleteEntry, updateEntry } from '../storage/coreCrud';
-import { Entry } from '../storage/typeEntry';
+import { deleteEntry, updateEntry } from '../storage_entry/coreCrud';
+import { Entry } from '../storage_entry/typeEntry';
 import { colors } from '../styles/global';
 import { formatDate, isExpired, syncStatuses } from '../utility/helpers';
 import ShareButton from './ShareButton';
@@ -96,7 +96,7 @@ setEditingField(null);
         <View style={styles.overlay}>
           <View style={styles.modal}>
             <View style={{flexDirection:'row', alignContent:'center', justifyContent:'space-between'}}>
-              <Text style={styles.modalTitle}>Vehicle Details</Text>
+              <Text style={styles.modalTitle}>Device Details</Text>
               <Ionicons style={{ marginRight:4 }} onPress={() => {setModalVisible(false);setEditingField(null);}} name= 'close-outline' size={27} color={colors.primary} />
             </View>
             

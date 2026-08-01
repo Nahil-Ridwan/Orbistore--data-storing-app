@@ -1,20 +1,24 @@
+import { clearAllCompanies } from '@/src/storage_company/coreCrud_company';
+import { Company } from '@/src/storage_company/typeCompany';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useMemo, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { LinearTransition, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOutDown, LinearTransition, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import CompanyItem from '../../components/CompanyItem';
 import EntryItem from '../../components/EntryItem';
-import { clearAllEntries } from '../../storage/coreCrud';
-import { Entry } from '../../storage/typeEntry';
+import { clearAllEntries } from '../../storage_entry/coreCrud';
+import { Entry } from '../../storage_entry/typeEntry';
 import { colors, globalStyles } from '../../styles/global';
 
 type Props = {
   entries: Entry[];
+  companies: Company[];
   searchVisible: boolean;
   setSearchVisible: (value: boolean) => void;
 };
 
-export default function AllEntriesScreen({ entries, searchVisible, setSearchVisible }: Props) {
+export default function AllEntriesScreen({ entries, companies, searchVisible, setSearchVisible }: Props) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [filterVehicle, setFilterVehicle] = useState('');
@@ -25,6 +29,14 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // for company
+  const [addvehicle, setAddvehicle] = useState(true);
+  const [filterPlace, setFilterPlace] = useState('');
+
+  const toggleCompany = () => {
+    setAddvehicle(!addvehicle)
+  };
+
   const handleSearch = (text: string) => {
     setQuery(text);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -33,7 +45,8 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
 
 
   const handleClearAll = () => {
-    Alert.alert('Clear All !', 'Delete all vehicles?', [
+   if(addvehicle) {
+    Alert.alert('Clear All !', 'Delete all devices?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -42,12 +55,31 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           try {
             await clearAllEntries();
           } catch (err) {
-            console.error('Failed to clear entries:', err);
-            Alert.alert('Error', 'Some entries may not have been deleted. Try again.');
+            console.error('Failed to clear devices:', err);
+            Alert.alert('Error', 'Some devices may not have been deleted. Try again.');
           }
         },
       },
     ]);
+   }
+   // for company
+   else {
+    Alert.alert('Clear All !', 'Delete all companies?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await clearAllCompanies();
+          } catch (err) {
+            console.error('Failed to clear companies:', err);
+            Alert.alert('Error', 'Some companies may not have been deleted. Try again.');
+          }
+        },
+      },
+    ]);
+   }
   };
 
   const filtered = useMemo(() => {
@@ -72,13 +104,30 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         String(entry.address ?? '').toLowerCase().includes(q)
       );
   
-      const matchesVehicle = !filterVehicle || String(entry.vehicle ?? '').toLowerCase().includes(filterVehicle.toLowerCase());
-      const matchesCompany = !filterCompany || String(entry.company ?? '').toLowerCase().includes(filterCompany.toLowerCase());
-      const matchesStatus = !filterStatus || String(entry.status ?? '').toLowerCase().includes(filterStatus.toLowerCase());
-      const matchesPayment = !filterPayment || String(entry.payment ?? '').toLowerCase().includes(filterPayment.toLowerCase());
+      const matchesVehicle = !filterVehicle || String(entry.vehicle ?? '').toLowerCase().includes(filterVehicle.toLowerCase().trim());
+      const matchesCompany = !filterCompany || String(entry.company ?? '').toLowerCase().includes(filterCompany.toLowerCase().trim());
+      const matchesStatus = !filterStatus || String(entry.status ?? '').toLowerCase().includes(filterStatus.toLowerCase().trim());
+      const matchesPayment = !filterPayment || String(entry.payment ?? '').toLowerCase().includes(filterPayment.toLowerCase().trim());
       return matchesQuery && matchesVehicle && matchesCompany && matchesStatus && matchesPayment;
     });
   }, [debouncedQuery, entries, filterVehicle, filterCompany, filterStatus, filterPayment]);
+
+  //for company
+
+  const companyfiltered = useMemo(() => {
+    const q = debouncedQuery.toLowerCase().trim();
+    return companies.filter((company) => {
+      const matchesQuery = !q || (
+        String(company.name ?? '').toLowerCase().includes(q) ||
+        String(company.companyplace ?? '').toLowerCase().includes(q) ||
+        String(company.stock ?? '').toLowerCase().includes(q) ||
+        String(company.unpaid ?? '').toLowerCase().includes(q)
+      );
+  
+      const matchesPlace = !filterPlace || String(company.companyplace ?? '').toLowerCase().includes(filterPlace.toLowerCase().trim());
+      return matchesQuery && matchesPlace ;
+    });
+  }, [debouncedQuery, companies, filterPlace]);
 
 
   const toggleSearch = () => {
@@ -89,6 +138,8 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
     setFilterStatus('');
     setFilterPayment('');
     setFilterVehicle('');
+    //for company
+    setFilterPlace('');
   };
 
   
@@ -101,6 +152,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
       style={{flex:1}} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'  
       }>
+      {(addvehicle &&
       <FlashList
         key={searchVisible ? 'search-open' : 'search-closed'}
         contentContainerStyle={{
@@ -147,6 +199,35 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           />
         )}
       />
+      )}
+    
+      {/*for company*/}
+      {(!addvehicle &&
+      <FlashList
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingBottom: 70,
+          // Push content down by the measured header height so items start below the header.
+          // As items scroll up they pass behind the absolutely-positioned header.
+          paddingTop: headerHeight + 10,
+        }}
+        data={companyfiltered}
+        keyExtractor={(company) => String(company.companyid)}
+        keyboardDismissMode='on-drag'
+        ListEmptyComponent={<Text style={globalStyles.empty}>No entries found.</Text>}
+        renderItem={({ item: company }) => (
+          <CompanyItem
+            key={company.companyid}
+            companyid={company.companyid}
+            name={company.name}
+            companyplace={company.companyplace}
+            stock={company.stock}
+            unpaid={company.unpaid}
+            companycreatedAt={company.companycreatedAt}
+          />
+        )}
+      />
+      )}
       </KeyboardAvoidingView>
 
       {/* ---- Header — absolutely positioned so the list scrolls behind it ---- */}
@@ -156,12 +237,18 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
       >
         <View style={globalStyles.header}>
-          <Text
+          <Animated.Text
+            key={addvehicle ? 'devices' : 'companies'} //  Force re-mount on change
+            entering={FadeInDown.duration(200)} // flipinx stretchx
+            exiting={FadeOutDown.duration(150)}
             onLongPress={handleClearAll}
+            onPress={toggleCompany}
             style={[globalStyles.title, { marginBottom: 15, marginLeft: 6 }]}
           >
-            All Vehicles
-          </Text>
+            {addvehicle ? 'Devices' : 'Companies'}
+            <Ionicons style={{ paddingLeft:30 }}size={24} color='hsl(20, 1%, 47%)' name='chevron-expand-outline'></Ionicons>
+          </Animated.Text>
+          
           <TouchableOpacity onPress={toggleSearch}>
             <Ionicons
               style={{ marginBottom: 10, marginRight: 13 }}
@@ -172,7 +259,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           </TouchableOpacity>
         </View>
 
-        {searchVisible && (
+        {searchVisible && addvehicle && (
           <Animated.View
             entering={ZoomIn.duration(200)} //zoomin
             exiting={ZoomOut.duration(150)}
@@ -180,7 +267,7 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           >
             <TextInput
               style={[styles.searchInput, { width:'65.91%' }]}
-              placeholder='Search Vehicles...'
+              placeholder='Search Devices...'
               placeholderTextColor={colors.textSecondary}
               value={query}
               onChangeText={handleSearch}
@@ -197,7 +284,34 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           </Animated.View>
           )}
 
-        {searchVisible && (
+        {/*for company*/}
+
+        {searchVisible && !addvehicle && (
+          <Animated.View
+            entering={ZoomIn.duration(200)} //zoomin
+            exiting={ZoomOut.duration(150)}
+            style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}
+          >
+            <TextInput
+              style={[styles.searchInput, { width:'65.91%' }]}
+              placeholder='Search Companies...'
+              placeholderTextColor={colors.textSecondary}
+              value={query}
+              onChangeText={handleSearch}
+              autoFocus
+            />
+
+            <TextInput
+              style={[styles.searchInput, { width:'31.6%' }]}
+              placeholder='Place'
+              placeholderTextColor={colors.textSecondary}
+              value={filterPlace}
+              onChangeText={setFilterPlace}
+            />
+          </Animated.View>
+          )}
+
+        {searchVisible && addvehicle && (
           <Animated.View
             entering={ZoomIn.duration(200)} // flipinx stretchx
             exiting={ZoomOut.duration(150)}
@@ -227,14 +341,25 @@ export default function AllEntriesScreen({ entries, searchVisible, setSearchVisi
           </Animated.View>
         )}
 
-        {searchVisible && (
+        {searchVisible && addvehicle && (
             <Animated.Text 
              entering={ZoomIn.duration(200)} // flipinx stretchx
              exiting={ZoomOut.duration(150)}
              style={{ color: colors.alert, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
-               Showing {filtered.length} vehicle{filtered.length !== 1 ? 's...' : '...'}
+               Showing {filtered.length} device{filtered.length !== 1 ? 's...' : '...'}
             </Animated.Text>
-        )}        
+        )}
+
+        {/*for company*/}
+
+        {searchVisible && !addvehicle && (
+            <Animated.Text 
+             entering={ZoomIn.duration(200)} // flipinx stretchx
+             exiting={ZoomOut.duration(150)}
+             style={{ color: colors.alert, fontSize: 14, marginTop: 13, marginBottom: 4, marginLeft: 10 }}>
+               Showing {companyfiltered.length} compan{companyfiltered.length !== 1 ? 'ies...' : 'y...'}
+            </Animated.Text>
+        )}
       </Animated.View>
     </View>
   );

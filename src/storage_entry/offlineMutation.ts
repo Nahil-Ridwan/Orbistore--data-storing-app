@@ -91,18 +91,23 @@ export const syncPendingMutations = async (): Promise<void> => {
 
     for (const mutation of mutations) {
       try {
+        const now = new Date().toISOString();
         if (mutation.type === 'UPSERT') {
           if (mutation.entry) {
-            await setDoc(doc(entriesRef, mutation.id), mutation.entry);
+            const entryToSync: Entry = {
+              ...mutation.entry,
+              updatedAt: now,
+            };
+            await setDoc(doc(entriesRef, mutation.id), entryToSync);
           }
         } else if (mutation.type === 'DELETE') {
-          await setDoc(doc(entriesRef, mutation.id), { id: mutation.id, deleted: true, updatedAt: new Date().toISOString() });
+          await setDoc(doc(entriesRef, mutation.id), { id: mutation.id, deleted: true, updatedAt: now });
         }
         await removePendingMutation(mutation.id);
         console.log(`Successfully synced mutation for ${mutation.id}`);
       } catch (err) {
         console.error(`Failed to sync mutation for ${mutation.id}:`, err);
-        break; // Stop loop if offline or error occurs
+        break; // Stop loop if offline or network error occurs
       }
     }
   } finally {
@@ -112,7 +117,7 @@ export const syncPendingMutations = async (): Promise<void> => {
 
 // Listen to network connectivity shifts to auto-sync pending updates when we go online
 NetInfo.addEventListener((state) => {
-  if (state.isConnected) {
+  if (state.isConnected && state.isInternetReachable !== false) {
     syncPendingMutations().catch((err) =>
       console.error('NetInfo triggered sync failed:', err)
     );

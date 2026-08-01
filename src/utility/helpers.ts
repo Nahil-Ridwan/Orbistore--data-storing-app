@@ -1,17 +1,26 @@
 import { collection, doc, writeBatch } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
-import { readCache, writeCache } from '../storage/cacheService';
-import { db } from '../storage/firebaseConfig';
-import { Entry } from '../storage/typeEntry';
+import { readCompanyCache } from '../storage_company/cacheService_company';
+import { Company } from '../storage_company/typeCompany';
+import { readCache, writeCache } from '../storage_entry/cacheService';
+import { Entry } from '../storage_entry/typeEntry';
+import { db } from './firebaseConfig';
 
 
 // ---- Firestore collection reference ----
 export const entriesRef = collection(db, 'entries');
 
+export const companiesRef = collection(db, 'companies');
+
 // One-time read — used by export and syncStatuses.
 export const getEntries = async (): Promise<Entry[]> => {
   const cached = await readCache();
   return sortEntries(cached);
+};
+
+export const getCompanies = async (): Promise<Company[]> => {
+  const cached = await readCompanyCache();
+  return sortCompanies(cached);
 };
 
 
@@ -115,32 +124,92 @@ export const formatDateimport = (val?: any): string | undefined => {
   return undefined;
 };
 
-export const getValidity = (inputdate?: string): number | undefined => {
+export const getValidity = (inputdate?: string, refTodayMs?: number): number | undefined => {
   const inputDate = parseAppDate(inputdate);
   if (!inputDate) return undefined;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   inputDate.setHours(0, 0, 0, 0);
-  const diffMs = inputDate.getTime() - today.getTime();
+  const todayMs = refTodayMs ?? (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.getTime();
+  })();
+  const diffMs = inputDate.getTime() - todayMs;
   return Math.round(diffMs / 86400000);
 };
 
-export const getAge = (inputdate?: string): number | undefined => {
+export const getAge = (inputdate?: string, refTodayMs?: number): number | undefined => {
   const inputDate = parseAppDate(inputdate);
   if (!inputDate) return undefined;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   inputDate.setHours(0, 0, 0, 0);
-  const diffMs = inputDate.getTime() - today.getTime();
-  return ( 0 - Math.round(diffMs / 86400000));
+  const todayMs = refTodayMs ?? (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.getTime();
+  })();
+  const diffMs = inputDate.getTime() - todayMs;
+  return -Math.round(diffMs / 86400000);
 };
 
 // ---- Sort helper (shared by both local and cloud paths) ----
- export const sortEntries = (entries: Entry[]): Entry[] =>
-  entries
-    .map((e) => ({ ...e, validity: getValidity(e.expdate), deviceage: getAge(e.installdate) }))
+export const sortEntries = (entries: Entry[]): Entry[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+  return entries
+    .map((e) => ({ ...e, validity: getValidity(e.expdate, todayMs), deviceage: getAge(e.installdate, todayMs) }))
     .sort((a, b) => (b.validity ?? -Infinity) - (a.validity ?? -Infinity));
+};
 
+// for company
+interface CompanyCounts {
+  stock: number;
+  unpaid: number;
+}
+
+export const computeCompanyCountsMap = (entries: Entry[]): Map<string, CompanyCounts> => {
+  const countsMap = new Map<string, CompanyCounts>();
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const companyKey = entry.company?.toLowerCase().trim();
+    if (!companyKey) continue;
+
+    let counts = countsMap.get(companyKey);
+    if (!counts) {
+      counts = { stock: 0, unpaid: 0 };
+      countsMap.set(companyKey, counts);
+    }
+
+    const status = entry.status?.toLowerCase().trim();
+    if (status === 'available') {
+      counts.stock += 1;
+    } else {
+      const payment = entry.payment?.toLowerCase().trim();
+      if (status === 'active' && payment !== 'received') {
+        counts.unpaid += 1;
+      }
+    }
+  }
+  return countsMap;
+};
+
+export const sortCompaniesWithEntries = (companies: Company[], entries: Entry[]): Company[] => {
+  const countsMap = computeCompanyCountsMap(entries);
+  return companies
+    .map((company) => {
+      const key = company.name?.toLowerCase().trim() || '';
+      const counts = countsMap.get(key) || { stock: 0, unpaid: 0 };
+      return {
+        ...company,
+        ...counts,
+      };
+    })
+    .sort((a, b) => (a.stock || 0) - (b.stock || 0));
+};
+
+export const sortCompanies = async (companies: Company[]): Promise<Company[]> => {
+  const entries = await getEntries();
+  return sortCompaniesWithEntries(companies, entries);
+};
 
 // ---- Status sync ----
 export const syncStatuses = async (): Promise<{ updated: number }> => {

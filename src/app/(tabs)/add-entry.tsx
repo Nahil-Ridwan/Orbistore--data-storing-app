@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
   Alert,
@@ -10,7 +11,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { addEntry } from '../../storage/coreCrud';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { addCompany } from '../../storage_company/coreCrud_company';
+import { addEntry } from '../../storage_entry/coreCrud';
 import { colors, globalStyles } from '../../styles/global';
 import { formatDate, formatDateOutput, monthMap } from '../../utility/helpers';
 
@@ -34,7 +37,17 @@ export default function AddEntryScreen() {
   const [note, setNote] = useState('');
   const [address, setAddress] = useState('');
 
-  const handleAddEntry = async () => {
+  //for company
+  const [name, setName] = useState('');
+  const [companyplace, setCompanyplace] = useState('');
+
+  const [addvehicle, setAddvehicle] = useState(true);
+
+  const toggleCompany = () => {
+    setAddvehicle(!addvehicle)
+  };
+  
+  const handleAddVehicle = async () => {
   if ( sim.length != 13 || !imei) {
     Alert.alert('Error', 'Please enter a valid sim and imei.');
     return;
@@ -55,6 +68,7 @@ export default function AddEntryScreen() {
 
   // rest unchanged...
     console.log('saving:', { company, place, mobile, type, lock, installdate, note, address });
+    
 
     // Don't await this — Firestore's write promise only resolves once the
     // server confirms it, which won't happen while offline. The local
@@ -80,8 +94,8 @@ export default function AddEntryScreen() {
       note: note || 'Nil',
       address: address || 'Nil',
     }).catch((err) => {
-      console.error('Failed to add entry:', err);
-      Alert.alert('Save failed', 'Your entry is saved locally and will sync once online.');
+      console.error('Failed to add device:', err);
+      Alert.alert('Save failed', 'Your device is saved locally and will sync once online.');
     });
 
     setCompany('');
@@ -100,38 +114,73 @@ export default function AddEntryScreen() {
     setImei('');
     setNote('');
     setAddress('');
-
-
   };
+
+  // for company
+  
+  const handleAddCompany = async () => {
+    if ( name.length == 0 ) {
+      Alert.alert('Error', 'Please enter a valid name.');
+      return;
+    }
+    
+    // rest unchanged...
+      console.log('saving company:', { name, companyplace});
+      
+      // for company
+      addCompany({
+        name: name || 'Nil',
+        companyplace: companyplace || 'Nil',
+        stock: 0,
+        unpaid: 0,
+        
+      }).catch((err) => {
+        console.error('Failed to add company:', err);
+        Alert.alert('Save failed', 'Your company is saved locally and will sync once online.');
+      });
+  
+      setName('');
+      setCompanyplace('');
+    };
 
   return (
     <KeyboardAvoidingView 
     style={globalStyles.container}
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={globalStyles.title}>Add Vehicle</Text>
+      <Animated.View>
+        <Animated.Text style={globalStyles.title}
+        key={addvehicle ? 'devices' : 'companies'} //  Force re-mount on change
+         entering={FadeInDown.duration(200)} // flipinx stretchx
+         exiting={FadeOutDown.duration(150)}
+         onPress={toggleCompany}>{addvehicle ? 'Add Device': 'Add Company'}
+         <Ionicons style={{ paddingLeft:30 }}size={24} color='hsl(20, 1%, 47%)' name='chevron-expand-outline'></Ionicons>
+        </Animated.Text>
+      </Animated.View>
 
-      <View style={styles.row}>
-
-         <TextInput
-          style={[styles.input, styles.rowInput]}
-          placeholder='Device'
-          placeholderTextColor={colors.textSecondary}
-          keyboardType='numeric'
-          value={device}
-          onChangeText={setDevice}
-        />
-         
-         <TextInput
-          style={[styles.input, styles.rowInput]}
-          placeholder='Status'
-          placeholderTextColor={colors.textSecondary}
-          autoCapitalize='characters'
-          value={status}
-          onChangeText={setStatus}
-        />
-
-      </View>
+      {addvehicle && (
+      <View>
+        <View style={styles.row}>
+  
+           <TextInput
+            style={[styles.input, styles.rowInput]}
+            placeholder='Device'
+            placeholderTextColor={colors.textSecondary}
+            keyboardType='numeric'
+            value={device}
+            onChangeText={setDevice}
+          />
+           
+           <TextInput
+            style={[styles.input, styles.rowInput]}
+            placeholder='Status'
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize='characters'
+            value={status}
+            onChangeText={setStatus}
+          />
+  
+        </View>
 
         <View style={styles.row}>
 
@@ -155,7 +204,7 @@ export default function AddEntryScreen() {
 
       </View>
 
-      <TouchableOpacity
+         <TouchableOpacity
             style={[styles.checkboxstyle, payment && styles.checkboxChecked]}
             onPress={() => setPayment(prev => !prev)}
           >
@@ -272,9 +321,38 @@ export default function AddEntryScreen() {
       />
 
 
-      <TouchableOpacity style={styles.button} onPress={handleAddEntry}>
-        <Text style={styles.buttonText}>Add Vehicle</Text>
+      <TouchableOpacity style={styles.button} onPress={handleAddVehicle}>
+        <Text style={styles.buttonText}>Add Device</Text>
       </TouchableOpacity>
+      </View>
+      )}
+
+      {!addvehicle && (
+        <View>
+        {/*for company*/}
+      
+          <TextInput
+            style={[styles.input, styles.rowInput]}
+            placeholder='Name'
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize='characters'
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={[styles.input, styles.rowInput]}
+            placeholder='Place'
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize='characters'
+            value={companyplace}
+            onChangeText={setCompanyplace}
+          />
+  
+        <TouchableOpacity style={styles.button} onPress={handleAddCompany}>
+          <Text style={styles.buttonText}>Add Company</Text>
+        </TouchableOpacity>
+      </View>
+      )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
