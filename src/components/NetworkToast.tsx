@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import NetInfo from '@react-native-community/netinfo';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Text } from 'react-native';
+import { Animated, StyleSheet, Text } from 'react-native';
 
 export default function NetworkToast() {
   const [toast, setToast] = useState<{ message: string; online: boolean; icon: keyof typeof Ionicons.glyphMap } | null>(null);
@@ -55,21 +55,10 @@ export default function NetworkToast() {
   return (
     <Animated.View
       pointerEvents='none'
-      style={{
-        position: 'absolute',
-        top: 50,
-        alignSelf: 'center',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        backgroundColor: toast.online ? '#1e3a2a' : '#3a1e1e',
-        borderColor: toast.online ? '#4caf50' : '#ff4d4d',
-        borderWidth: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        opacity: toastOpacity,
-      }}
+      style={[styles.toast, 
+        { backgroundColor: toast.online ? '#1e3a2a' : '#3a1e1e',
+        borderColor: toast.online ? '#4caf50' : '#ff4d4d', 
+        opacity: toastOpacity}]}
     >
       <Ionicons name={toast.icon} size={16} color={toast.online ? '#4caf50' : '#ff4d4d'} />
       <Text style={{ color: toast.online ? '#4caf50' : '#ff4d4d', fontSize: 13, fontWeight: '600' }}>
@@ -78,3 +67,18 @@ export default function NetworkToast() {
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    top: 50,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,    
+  }
+});

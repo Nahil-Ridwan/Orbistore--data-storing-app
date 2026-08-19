@@ -34,7 +34,7 @@ export default function HomeScreen({ entries, openAllEntriesWithSearch, reload }
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={globalStyles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView style={globalStyles.container} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         <View style={globalStyles.header}>
           <Text style={[globalStyles.title, {color:colors.primary}]}>Orbitracker</Text>
 

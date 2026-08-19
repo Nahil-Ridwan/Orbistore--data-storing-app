@@ -19,7 +19,7 @@ export default function MacroGrid({ entries, onPress }: MacroGridProps) {
     <TouchableOpacity onPress={onPress}>
       <MacroCard
         label={monthName.toUpperCase()}
-        value={`${dayNumber}`}
+        value={String(dayNumber).padStart(2,'0')}
         color='#f86307'
       />
       <Ionicons style={{

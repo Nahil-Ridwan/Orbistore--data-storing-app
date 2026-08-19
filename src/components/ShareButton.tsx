@@ -26,7 +26,7 @@ const openWhatsAppBusiness = async (phone: string, message: string) => {
 };
 
 export default function ShareButton({ entry }: ShareButtonProps) {
-  const handleShare = async () => {
+  const handleReminder = async () => {
     const message = `🚨നിങ്ങളുടെ ${entry.vehicle}
 വാഹനത്തിലെ GPS  ${entry.expdate} ൽ  EXPIRE ആവുന്നതാണ് / ആയതാണ്...
 
@@ -40,8 +40,39 @@ Period: One year`;
     await openWhatsAppBusiness(phone, message);
   };
 
+const handleOnboard = async () => {
+  const message = `💫💫💫
+Dear customer, 
+
+Orbitracker GPS തെരെഞ്ഞെടുത്തതിന് നന്ദി...👍👍
+
+✅ ${entry.vehicle}
+വാഹനത്തിലെ GPS  ഇപ്പോൾ SET ആണ്.
+
+
+TB TRACK Android link 👇🏻 ആൻഡ്രോയിഡ്
+https://play.google.com/store/apps/details?id=com.tbtrack.gps
+
+
+TB TRACK iOS link 👇 ഐഫോൺ
+https://apps.apple.com/us/app/tb-track-vehicle-tracking/id1249657981
+
+🔖 User ID: ${entry.username}
+🔑 PWD: 112233
+
+For any assistance;
+
+              Please Call or WhatsApp;
+📌        9645 994 556 
+               www.orbixgps.com`;
+
+    const phone = String(entry.mobile).replace(/\D/g, '');
+
+    await openWhatsAppBusiness(phone, message);
+}
+
   return (
-    <TouchableOpacity onPress={handleShare}>
+    <TouchableOpacity onPress={handleReminder} onLongPress={handleOnboard}>
       <Ionicons name="share-outline" size={28} color={colors.primary} />
     </TouchableOpacity>
   );

@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 4,
     marginTop:34,
   },
+
   label: {
     fontSize: 35,
     color: 'hsl(0, 0%, 87%)',
@@ -37,6 +38,7 @@ const styles = StyleSheet.create({
     marginLeft: 17,
     marginBottom: 10
   },
+  
   value: {
     fontSize: 50,
     fontWeight: 'bold',

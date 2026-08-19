@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { writeBatch } from 'firebase/firestore';
+import { readCache } from '../storage_entry/cacheService';
 import { db } from '../utility/firebaseConfig';
 import { companiesRef } from '../utility/helpers';
-import { readCache } from '../storage_entry/cacheService';
 import { CACHE_KEY, readCompanyCache, removeCacheCompany, updateCacheCompany } from "./cacheService_company";
 import { addPendingCompanyMutation, PENDING_MUTATIONS_KEY, syncPendingCompanyMutations } from "./offlineMutation_company";
 import { LAST_SYNC_KEY, notifyCompanySubscribers } from "./subscription_company";
@@ -38,29 +38,6 @@ export const addCompany = async (
   return newCompany;
 };
 
-
-
-export const updateCompany = async (updated: Company): Promise<void> => {
-
-  const finalCompany: Company = {
-    ...updated,
-    companyupdatedAt: new Date().toISOString(), // for cloud
-  };
-
-  // Update cache immediately.
-  await updateCacheCompany(finalCompany);
-  const cached = await readCompanyCache();
-  const entries = await readCache();
-  notifyCompanySubscribers(cached, entries);
-
-  // Add to pending mutations queue
-  await addPendingCompanyMutation(finalCompany.companyid, 'UPSERT', finalCompany);
-
-  // Trigger sync in background
-  syncPendingCompanyMutations().catch((err) =>
-    console.error('Firestore updateCompany sync failed:', err),
-  );
-};
 
 export const deleteCompany = async (id: string): Promise<void> => {
   // Remove from cache immediately.

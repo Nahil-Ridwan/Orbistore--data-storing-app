@@ -159,11 +159,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.12)',
     backgroundColor: 'rgba(30,30,40,0.72)',
   },
+
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   iconWrapper: {
     width: 40,
     height: 32,
@@ -171,6 +173,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  
   iconWrapperFocused: {
     backgroundColor: `${colors.primary}22`,
     borderRadius:13,

@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginBottom: 16,
   },
+  
   empty: {
     color: '#a0a0b0',
     fontSize: 14,

@@ -89,10 +89,10 @@ setEditingField(null);
       </TouchableOpacity>
       <Modal visible={modalVisible} animationType='slide' transparent>
         <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-  >
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
         <View style={styles.overlay}>
           <View style={styles.modal}>
             <View style={{flexDirection:'row', alignContent:'center', justifyContent:'space-between'}}>
@@ -165,9 +165,11 @@ setEditingField(null);
                             value={String(edited[key] ?? '')}
                             autoFocus
                             autoCapitalize={['note', 'address'].includes(key) ? 'sentences' : 'characters'}
+                            keyboardType={['device', 'mobile', 'sim', 'imei', 'installdate', 'expdate', 'renewal1', 'renewal2', 'renewal3', 'renewal4', 'renewal5'].includes(key) ? 'numeric' : 'default'}
                             multiline={['note', 'address'].includes(key)}
                             textAlignVertical={['note', 'address'].includes(key) ? 'top' : 'center'}
                             numberOfLines={5}
+                            editable={!['validity', 'deviceage', 'expdate'].includes(key)}
                             onChangeText={(val) =>
                               setEdited(prev => ({
                                 ...prev,
@@ -225,80 +227,166 @@ setEditingField(null);
 })
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: colors.surface, borderRadius: 10, padding: 16, marginBottom: 10 },
-  name: { fontSize: 16, fontWeight: '600', color: colors.text },
-  macros: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  info: { flex: 1 },
-  actions: {
-  alignItems: 'center',
-  gap: 4,
-  width:82,
-},
-actionButtons: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 14,
-},
-fieldRow: {
-  flexDirection: 'row',
-  gap: 10,
-},
-fieldHalf: {
-  flex: 1,
-},
+  container: { 
+    backgroundColor: colors.surface,
+    borderRadius: 10, 
+    padding: 16, 
+    marginBottom: 10
+  },
 
-checkboxChecked: {
-  backgroundColor: '#275728',
-},
-checkboxLabel: {
-  color: colors.text,
-  fontSize: 15,
-},
-checkboxstyle: {
+  name: { fontSize: 16, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+
+  macros: { fontSize: 13, 
+    color: colors.textSecondary, 
+    marginTop: 4 
+  },
+
+  row: { flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+
+  info: { 
+    flex: 1 
+  },
+
+  actions: {
+    alignItems: 'center',
+    gap: 4,
+    width:82,
+  },
+    
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+
+  fieldRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+  fieldHalf: {
+    flex: 1,
+  },
+  
+  checkboxChecked: {
+    backgroundColor: '#275728',
+  },
+
+  checkboxLabel: {
+    color: colors.text,
+    fontSize: 15,
+  },
+
+  checkboxstyle: {
     backgroundColor: '#822828',
     color: colors.text,
     padding: 10,
     borderRadius: 8,
     height:40,
   },
+
   noteInput: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
+    borderWidth:3,
+      borderColor:'#7a7ab4'
+  },
   
-  paddingTop: 10,
-  paddingBottom: 10,
-  textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
-  borderWidth:3,
-  borderColor:'#7a7ab4'
-},
-
-addressInput: {
+  addressInput: {
+    paddingTop: 13,
+    paddingBottom: 10,
+    minHeight:46,
+    textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
+  },
   
-  paddingTop: 13,
-  paddingBottom: 10,
-  minHeight:46,
-  textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
-},
+  highlightField: {
+    backgroundColor: colors.background,
+  },
 
-highlightField: {
-  backgroundColor: colors.background,
-},
+  overlay: { 
+    flex: 1, 
+    backgroundColor: 'rgba(0,0,0,0.6)', 
+    justifyContent: 'center', 
+    padding: 20 
+  },
 
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
-  modal: { backgroundColor: colors.surface, borderRadius: 16, padding: 20, maxHeight: '85%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },
-  field: { marginBottom: 12 },
-  label: { fontSize: 12, color: colors.textSecondary, marginBottom: 4 },
-  fieldInput: { backgroundColor: '#3e3e5c', color: colors.text, paddingVertical: 10, paddingLeft: 10, borderRadius: 8, fontSize: 15 },
-  modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  cancelButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: colors.background },
-  cancelText: { color: colors.textSecondary, fontWeight: '600' },
-  saveButton: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: colors.primary },
-  saveText: { color: colors.background, fontWeight: '600' },
+  modal: { 
+    backgroundColor: colors.surface, 
+    borderRadius: 16, 
+    padding: 20, 
+    maxHeight: '85%' 
+  },
+
+  modalTitle: { fontSize: 18, 
+    fontWeight: '700', 
+    color: colors.text, 
+    marginBottom: 16 
+  },
+
+  field: { 
+    marginBottom: 12 
+  },
+
+  label: { 
+    fontSize: 12, 
+    color: colors.textSecondary, 
+    marginBottom: 4 
+  },
+
+  fieldInput: { 
+    backgroundColor: '#3e3e5c', 
+    color: colors.text, 
+    paddingVertical: 10, 
+    paddingLeft: 10, 
+    borderRadius: 8, 
+    fontSize: 15 
+  },
+
+  modalActions: { 
+    flexDirection: 'row', 
+    gap: 10, 
+    marginTop: 16 
+  },
+
+  cancelButton: { 
+    flex: 1, 
+    padding: 12, 
+    borderRadius: 8, 
+    alignItems: 'center', 
+    backgroundColor: colors.background 
+  },
+
+  cancelText: { 
+    color: colors.textSecondary, 
+    fontWeight: '600'
+   },
+
+  saveButton: { 
+    flex: 1, 
+    padding: 12, 
+    borderRadius: 8, 
+    alignItems: 'center', 
+    backgroundColor: colors.primary 
+  },
+
+  saveText: { 
+    color: colors.background, 
+    fontWeight: '600' 
+  },
+
   fieldDisplay: {
-  justifyContent: 'center',
-},
-fieldDisplayText: {
-  color: colors.text,
-  fontSize: 15,
-},
+    justifyContent: 'center',
+  },
+
+  fieldDisplayText: {
+    color: colors.text,
+    fontSize: 15,
+  },
 });

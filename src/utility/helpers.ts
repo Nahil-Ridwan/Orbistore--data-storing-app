@@ -57,14 +57,15 @@ export const isExpired = (dateStr?: string): boolean => {
 
 export const formatDate = (val?: string): string | undefined => {
     if (!val) return '';
-    const parts = val.trim().split(/[\s-]+/);
+    const parts = val.trim().split(/[\s-.]+/);
     if (parts.length === 3) {
       const [day, month, year] = parts;
       const monthIndex = isNaN(Number(month))
         ? monthMap[month.toUpperCase()]
         : Number(month) - 1;
       if (monthIndex === undefined || isNaN(monthIndex)) return val;
-      const date = new Date(2000 + Number(year), monthIndex, Number(day));
+      const yearNum = year.length === 2 ? 2000 + Number(year) : Number(year);
+      const date = new Date(yearNum, monthIndex, Number(day));
       if (!isNaN(date.getTime())) {
         return formatDateOutput(date)
       }

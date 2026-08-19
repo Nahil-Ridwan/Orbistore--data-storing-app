@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { deleteCompany, updateCompany } from '../storage_company/coreCrud_company';
+import { deleteCompany } from '../storage_company/coreCrud_company';
 import { Company } from '../storage_company/typeCompany';
 import { colors } from '../styles/global';
 
@@ -9,14 +9,7 @@ export default React.memo(function CompanyItem({
   
   companyid, name, companyplace, stock, unpaid, companycreatedAt
 }: Company) {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [edited, setEdited] = useState<Company>({ companyid, name, companyplace, stock, unpaid, companycreatedAt });
-  const [editingField, setEditingField] = useState<keyof Company | null>(null);
   
-  useEffect(() => {
-  setEdited({ companyid, name, companyplace, stock, unpaid, companycreatedAt });
-}, [companyid, name, companyplace, stock, unpaid, companycreatedAt]);
-  const company: Company = { companyid, name, companyplace, stock, unpaid, companycreatedAt };
 
   const handleLongPress = () => {
     Alert.alert('Delete Entry', `Are you sure you want to delete "${name}"?`, [
@@ -25,24 +18,6 @@ export default React.memo(function CompanyItem({
     ]);
   };
 
-  const handleSave = async () => {
-
-
-  const updatedEntry = {
-    ...edited,
-  };
-
-    setModalVisible(false);
-setEditingField(null);
-   
-    try {
-    await updateCompany(updatedEntry);
-
-  } catch (err) {
-    console.error('Failed to save entry:', err);
-    Alert.alert('Save failed', 'Your change is saved locally and will sync once online.');
-  }
-};
 
 
 
@@ -74,15 +49,65 @@ setEditingField(null);
 })
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: colors.surface, borderRadius: 15, paddingTop: 16, paddingBottom:9, paddingHorizontal:10, marginBottom: 10 },
-  name: { fontSize: 18, fontWeight: '600', color: colors.text },
-  place: { fontSize: 15, color: colors.textSecondary, fontWeight:'600' },
-  row: { flexDirection: 'column', justifyContent: 'space-between' },
+  container: { 
+    backgroundColor: colors.surface, 
+    borderRadius: 15, 
+    paddingTop: 16, 
+    paddingBottom:9, 
+    paddingHorizontal:10, 
+    marginBottom: 10 
+  },
 
-  numbercard: {flexDirection:'row', marginTop:10, justifyContent:'space-between',backgroundColor: 'hsl(240, 20%, 32%)', padding:9, borderRadius:15},
-  stockcard: { backgroundColor: 'hsl(122, 39%, 34%)', width:150, shadowColor:'hsl(20,20%,20%)', height:65, borderRadius:15, justifyContent:'center', alignItems: 'center' },
-  unpaidcard: { backgroundColor: 'hsl(0, 60%, 46%)', width:150, height:65, borderRadius:15, justifyContent:'center', alignItems: 'center' },
-  unpaidstocknum: { fontWeight:'600', color: 'hsl(0, 0%, 100%)', fontSize:25 },
+  name: { 
+    fontSize: 18, 
+    fontWeight: '600', 
+    color: colors.text 
+  },
+
+  place: { 
+    fontSize: 15, 
+    color: colors.textSecondary, 
+    fontWeight:'600' 
+  },
+
+  row: { 
+    flexDirection: 'column', 
+    justifyContent: 'space-between' 
+  },
+
+  numbercard: {
+    flexDirection:'row', 
+    marginTop:10, 
+    justifyContent:'space-between',
+    backgroundColor: 'hsl(240, 20%, 32%)', 
+    padding:9, 
+    borderRadius:15
+  },
+
+  stockcard: { 
+    backgroundColor: 'hsl(122, 39%, 34%)', 
+    width:'49.3%', 
+    shadowColor:'hsl(20,20%,20%)', 
+    height:65, 
+    borderRadius:15, 
+    justifyContent:'center', 
+    alignItems: 'center' 
+  },
+
+  unpaidcard: { 
+    backgroundColor: 'hsl(0, 60%, 46%)', 
+    width:'49.3%', 
+    height:65, 
+    borderRadius:15, 
+    justifyContent:'center', 
+    alignItems: 'center' 
+  },
+
+  unpaidstocknum: { 
+    fontWeight:'600', 
+    color: 'hsl(0, 0%, 100%)', 
+    fontSize:25 
+  },
 
   info: { 
     flex: 1,
@@ -90,5 +115,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal:10,
     justifyContent: 'space-between'      
-   },
+  },
 });

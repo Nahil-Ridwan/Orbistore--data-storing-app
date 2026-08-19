@@ -162,6 +162,7 @@ export default function AllEntriesScreen({ entries, companies, searchVisible, se
           // As items scroll up they pass behind the absolutely-positioned header.
           paddingTop: headerHeight + 10,
         }}
+        showsVerticalScrollIndicator={false}
         data={filtered}
         keyExtractor={(entry) => String(entry.id)}
         keyboardDismissMode='on-drag'
@@ -211,6 +212,7 @@ export default function AllEntriesScreen({ entries, companies, searchVisible, se
           // As items scroll up they pass behind the absolutely-positioned header.
           paddingTop: headerHeight + 10,
         }}
+        showsVerticalScrollIndicator={false}
         data={companyfiltered}
         keyExtractor={(company) => String(company.companyid)}
         keyboardDismissMode='on-drag'
@@ -374,6 +376,7 @@ const styles = {
     fontSize: 15,
     marginTop: 0,
   },
+
   header: {
     // Floats above the FlashList — the list scrolls behind this
     position: 'absolute' as const,
@@ -384,7 +387,6 @@ const styles = {
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 8,
-    zIndex: 10,
-    
+    zIndex: 10,  
   },
 };

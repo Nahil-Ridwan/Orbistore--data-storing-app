@@ -274,6 +274,7 @@ export default function AddEntryScreen() {
           style={styles.input}
           placeholder='Install Date'
           placeholderTextColor={colors.textSecondary}
+          keyboardType='numeric'
           autoCapitalize='characters'
           value={installdate}
           onChangeText={setInstalldate}
@@ -367,13 +368,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 16,
   },
+
   row: {
     flexDirection: 'row',
     gap: 10,
   },
+
   rowInput: {
     flex: 1,
   },
+
   button: {
     backgroundColor: colors.primary,
     padding: 16,
@@ -382,33 +386,39 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 95
   },
+
   buttonText: {
     color: colors.background,
     fontSize: 16,
     fontWeight: 'bold',
   },
+
   checkboxRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginTop: 16,
-  gap: 10,
-},
-checkbox: {
-  backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 10,
+  },
+
+  checkbox: {
+    backgroundColor: colors.surface,
     color: colors.text,
     padding: 16,
     borderRadius: 10,
     fontSize: 16,
     marginTop: 16,
-},
-checkboxChecked: {
-  backgroundColor: '#275728',
-},
-checkboxLabel: {
-  color: colors.textSecondary,
-  fontSize: 16,
-},
-checkboxstyle: {
+  },
+
+  checkboxChecked: {
+    backgroundColor: '#275728',
+  },
+
+  checkboxLabel: {
+    color: colors.textSecondary,
+    fontSize: 16,
+  },
+
+  checkboxstyle: {
     backgroundColor: '#822828',
     color: colors.text,
     padding: 16,
@@ -418,9 +428,8 @@ checkboxstyle: {
   },
 
   noteInput: {
-  minHeight: 53,
-  paddingTop: 15,
-  textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
-},
-
+    minHeight: 53,
+    paddingTop: 15,
+    textAlignVertical: 'top', // safe to also set here for RN versions where the prop above is ignored
+  },
 });
