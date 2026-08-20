@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { deleteEntry, updateEntry } from '../storage_entry/coreCrud';
 import { Entry } from '../storage_entry/typeEntry';
@@ -54,6 +54,66 @@ setEditingField(null);
   }
 };
 
+// PRESS ACIONS
+
+const lastPress = useRef<number>(0);
+ const pressTimer = useRef<number | null>(null);
+const [isDoubleTap, setIsDoubleTap] = useState(false);
+
+const handleSinglePress = () => {
+    console.log('Single press - open modal');
+    setModalVisible(true);
+  };
+
+const handleDoublePress = () => {
+    console.log('Double press detected!');
+    Clipboard.setStringAsync(String(imei));
+    Clipboard.setStringAsync(String(sim));
+  };
+
+ const handlePress = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+
+    if (lastPress.current && (now - lastPress.current) < DOUBLE_PRESS_DELAY) {
+      // Double tap detected
+      if (pressTimer.current) {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+      lastPress.current = 0;
+      setIsDoubleTap(true);
+      handleDoublePress();
+      
+      setTimeout(() => setIsDoubleTap(false), 100);
+    } else {
+      setIsDoubleTap(false);
+      lastPress.current = now;
+      
+      if (pressTimer.current) {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+      
+      pressTimer.current = setTimeout(() => {
+        if (!isDoubleTap) {
+          handleSinglePress();
+        }
+        lastPress.current = 0;
+        pressTimer.current = null;
+      }, DOUBLE_PRESS_DELAY);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (pressTimer.current) {
+        clearTimeout(pressTimer.current);
+      }
+    };
+  }, []);
+
+
 
   const displayStatus = (() => {
   if (!expdate) return status;
@@ -65,7 +125,7 @@ setEditingField(null);
 
   return (
     <>
-      <TouchableOpacity style={styles.container} onLongPress={handleLongPress} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity style={styles.container} onLongPress={handleLongPress} onPress={handlePress}>
         <View style={styles.row}>
           <View style={styles.info}>
             <Text style={styles.name}>{vehicle}   <Text style={{ fontSize:15, color: isExpired(expdate)? '#ff4d4d' : '#4caf50' }}>{validity}</Text></Text>
