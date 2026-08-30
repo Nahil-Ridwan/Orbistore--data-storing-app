@@ -47,9 +47,10 @@ export const syncCompanyCounts = async (entries: Entry[]) => {
     const updatedCompanies = companies.map((company) => {
       const key = String(company.name ?? '').toLowerCase().trim();
       const count = counts[key] ?? { stock: 0,  unpaid: 0 };
-      if (company.stock !== count.stock || company.unpaid !== count.unpaid) {
+      const newPayment: 'RECEIVED' | 'NOT PAID' = count.unpaid > 0 ? 'NOT PAID' : 'RECEIVED';
+      if (company.stock !== count.stock || company.unpaid !== count.unpaid || company.payment !== newPayment) {
         changed = true;
-        return { ...company, stock: count.stock, unpaid: count.unpaid };
+        return { ...company, stock: count.stock, unpaid: count.unpaid, payment: newPayment };
       }
       return company;
     });

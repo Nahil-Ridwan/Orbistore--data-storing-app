@@ -120,8 +120,7 @@ export default function AllEntriesScreen({ entries, companies, searchVisible, se
       const matchesQuery = !q || (
         String(company.name ?? '').toLowerCase().includes(q) ||
         String(company.companyplace ?? '').toLowerCase().includes(q) ||
-        String(company.stock ?? '').toLowerCase().includes(q) ||
-        String(company.unpaid ?? '').toLowerCase().includes(q)
+        String(company.payment ?? '').toLowerCase().includes(q)
       );
   
       const matchesPlace = !filterPlace || String(company.companyplace ?? '').toLowerCase().includes(filterPlace.toLowerCase().trim());
@@ -225,6 +224,7 @@ export default function AllEntriesScreen({ entries, companies, searchVisible, se
             companyplace={company.companyplace}
             stock={company.stock}
             unpaid={company.unpaid}
+            payment={company.payment}
             companycreatedAt={company.companycreatedAt}
           />
         )}

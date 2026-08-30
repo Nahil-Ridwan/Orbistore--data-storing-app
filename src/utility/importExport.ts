@@ -184,15 +184,20 @@ const parseVehicleRows = (data: any[]): Entry[] =>
 
 // ---- Parse "companies" rows into Company[] ----
 const parseCompanyRows = (data: any[]): Company[] =>
-  data.map((row) => ({
-    companyid: row.companyid ? String(row.companyid) : Date.now().toString() + Math.random().toString(36).slice(2),
-    name: row.name ?? '',
-    companyplace: row.companyplace ?? undefined,
-    stock: row.stock !== undefined && row.stock !== '' ? Number(row.stock) : undefined,
-    unpaid: Number(row.unpaid) || 0,
-    companycreatedAt: row.companycreatedAt ?? new Date().toISOString(),
-    companyupdatedAt: new Date().toISOString(),
-  }));
+  data.map((row) => {
+    const unpaid = Number(row.unpaid) || 0;
+    const payment: 'RECEIVED' | 'NOT PAID' = unpaid > 0 ? 'NOT PAID' : 'RECEIVED';
+    return {
+      companyid: row.companyid ? String(row.companyid) : Date.now().toString() + Math.random().toString(36).slice(2),
+      name: row.name ?? '',
+      companyplace: row.companyplace ?? undefined,
+      stock: row.stock !== undefined && row.stock !== '' ? Number(row.stock) : undefined,
+      unpaid,
+      payment,
+      companycreatedAt: row.companycreatedAt ?? new Date().toISOString(),
+      companyupdatedAt: new Date().toISOString(),
+    };
+  });
 
 // Generic batch-commit-to-Firestore + cache + pending-mutation-queue helper,
 // shared between entries and companies so the two import paths stay in sync.

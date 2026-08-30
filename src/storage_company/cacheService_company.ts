@@ -29,11 +29,13 @@ export const writeCompanyCache = async (companies: Company[]): Promise<void> => 
 };
 
 export const updateCacheCompany = async (updated: Company): Promise<void> => {
+  const payment: 'RECEIVED' | 'NOT PAID' = (updated.unpaid || 0) > 0 ? 'NOT PAID' : 'RECEIVED';
+  const companyWithPayment: Company = { ...updated, payment };
   const cached = await readCompanyCache();
-  const exists = cached.some((e) => e.companyid === updated.companyid);
+  const exists = cached.some((e) => e.companyid === companyWithPayment.companyid);
   const next = exists
-    ? cached.map((e) => (e.companyid === updated.companyid ? updated : e))
-    : [updated, ...cached];
+    ? cached.map((e) => (e.companyid === companyWithPayment.companyid ? companyWithPayment : e))
+    : [companyWithPayment, ...cached];
   await writeCompanyCache(next);
 };
 

@@ -67,6 +67,7 @@ const handleSinglePress = () => {
 
 const handleDoublePress = () => {
     console.log('Double press detected!');
+    Clipboard.setStringAsync(String(vehicle));
     Clipboard.setStringAsync(String(imei));
     Clipboard.setStringAsync(String(sim));
   };

@@ -7,7 +7,7 @@ import { colors } from '../styles/global';
 
 export default React.memo(function CompanyItem({
   
-  companyid, name, companyplace, stock, unpaid, companycreatedAt
+  companyid, name, companyplace, stock, unpaid
 }: Company) {
   
 

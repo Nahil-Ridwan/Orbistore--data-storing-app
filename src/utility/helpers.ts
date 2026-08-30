@@ -199,9 +199,12 @@ export const sortCompaniesWithEntries = (companies: Company[], entries: Entry[])
     .map((company) => {
       const key = company.name?.toLowerCase().trim() || '';
       const counts = countsMap.get(key) || { stock: 0, unpaid: 0 };
+      const unpaid = counts.unpaid;
+      const payment: 'RECEIVED' | 'NOT PAID' = unpaid > 0 ? 'NOT PAID' : 'RECEIVED';
       return {
         ...company,
         ...counts,
+        payment,
       };
     })
     .sort((a, b) => (a.stock || 0) - (b.stock || 0));

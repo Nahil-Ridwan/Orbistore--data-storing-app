@@ -9,7 +9,7 @@ import { LAST_SYNC_KEY, notifyCompanySubscribers } from "./subscription_company"
 import { Company } from "./typeCompany";
 
 export const addCompany = async (
-  company: Omit<Company, 'companyid' | 'companycreatedAt'>,
+  company: Omit<Company, 'companyid' | 'companycreatedAt' | 'payment'>,
 ): Promise<Company> => {
   
 
@@ -17,6 +17,7 @@ export const addCompany = async (
   const newCompany: Company = {
     ...company,
     companyid,
+    payment: (company.unpaid || 0) > 0 ? 'NOT PAID' : 'RECEIVED',
     companycreatedAt: new Date().toISOString(),
     companyupdatedAt: new Date().toISOString(), // for cloud
   };

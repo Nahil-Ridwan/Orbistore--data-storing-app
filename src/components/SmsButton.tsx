@@ -41,24 +41,39 @@ export default function SmsButton({ entry }: SmsButtonProps) {
     }
   };
 
-  const handleWarning = async () => {
-    const message = `${entry.vehicle}
-ഈ വാഹനത്തിലെ GPS  expire ആയതാണ്. ഇതുവരെ റീച്ചാർജ് ചെയ്തിട്ടില്ല.
+const handleOnboard = async () => {
+  const message = `💫💫💫
+Dear customer, 
 
-*2 ദിവസം കൂടി കഴിഞ്ഞാൽ SIM കട്ടാവുന്നതാണ്.*
+Orbitracker GPS തെരെഞ്ഞെടുത്തതിന് നന്ദി...👍👍
 
- പിന്നീട് ഇത് റീചാർജ് ചെയ്യണമെങ്കിൽ SIM മാറ്റിയിടേണ്ടി വരുന്നതാണ്.
+✅ ${entry.vehicle}
+വാഹനത്തിലെ GPS  ഇപ്പോൾ SET ആണ്.
 
-റീച്ചാർജ് ചെയ്യാൻ :
-please WhatsApp / CALL:  9645 994 556`;
+
+TB TRACK Android link 👇🏻 ആൻഡ്രോയിഡ്
+https://play.google.com/store/apps/details?id=com.tbtrack.gps
+
+
+TB TRACK iOS link 👇 ഐഫോൺ
+https://apps.apple.com/us/app/tb-track-vehicle-tracking/id1249657981
+
+🔖 User ID: ${entry.username}
+🔑 PWD: 112233
+
+For any assistance;
+
+              Please Call or WhatsApp;
+📌        9645 994 556 
+               www.orbixgps.com`;
 
     const phone = String(entry.mobile).replace(/\D/g, '');
 
     await openWhatsAppBusiness(phone, message);
-  };
+}  
   
   return (
-    <TouchableOpacity onPress={handleCommand} onLongPress={handleWarning}>
+    <TouchableOpacity onPress={handleCommand} onLongPress={handleOnboard}>
       <Ionicons name='chatbox-outline' size={25} color={colors.primary} />
     </TouchableOpacity>
   );
