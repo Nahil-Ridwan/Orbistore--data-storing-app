@@ -4,6 +4,7 @@ export const colors = {
   background: '#1a1a2e',
   header: '#242444',
   surface: '#2a2a4a',
+  popup: '#2a2a4a',
 
   primary: '#f86307',
   text: '#ffffff',

@@ -5,9 +5,9 @@ import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, T
 import { deleteEntry, updateEntry } from '../storage_entry/coreCrud';
 import { Entry } from '../storage_entry/typeEntry';
 import { colors } from '../styles/global';
+import { handleCommand, handleOnboard, handleReminder, handleWarning } from '../utility/Actions';
 import { formatDate, isExpired, syncStatuses } from '../utility/helpers';
-import ShareButton from './ShareButton';
-import SmsButton from './SmsButton';
+import CustomActionSheet from './ActionSheet';
 
 
 export default React.memo(function EntryItem({
@@ -17,6 +17,7 @@ export default React.memo(function EntryItem({
   const [modalVisible, setModalVisible] = useState(false);
   const [edited, setEdited] = useState<Entry>({ id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
   const [editingField, setEditingField] = useState<keyof Entry | null>(null);
+  const [isActionSheetVisible, setIsActionSheetVisible] = useState(false);
   
   useEffect(() => {
   setEdited({ id, company, place, device, username, mobile, vehicle, type, lock, devicemodel, installdate, expdate, validity, deviceage, shipnum, status, payment, sim, imei, note, address, renewal1, renewal2, renewal3, renewal4, renewal5, createdAt });
@@ -65,12 +66,16 @@ const handleSinglePress = () => {
     setModalVisible(true);
   };
 
-const handleDoublePress = () => {
-    console.log('Double press detected!');
-    Clipboard.setStringAsync(String(vehicle));
-    Clipboard.setStringAsync(String(imei));
-    Clipboard.setStringAsync(String(sim));
-  };
+const handleDoublePress = async () => {
+  console.log('Double press detected!');
+  try {
+    await Clipboard.setStringAsync(String(vehicle));
+    await Clipboard.setStringAsync(String(imei));
+    await Clipboard.setStringAsync(String(sim));
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+  }
+};
 
  const handlePress = () => {
     const now = Date.now();
@@ -104,6 +109,15 @@ const handleDoublePress = () => {
         pressTimer.current = null;
       }, DOUBLE_PRESS_DELAY);
     }
+  };
+
+
+  const handleClose = () => {
+    setIsActionSheetVisible(false);
+  };
+
+  const handleAction = () => {
+    setIsActionSheetVisible(true);
   };
 
   useEffect(() => {
@@ -142,12 +156,15 @@ const handleDoublePress = () => {
             : '#a0a0b0'}}>
             {displayStatus}</Text>
            <View style={styles.actionButtons}>
-             <View style={{  marginTop:7 }}><SmsButton entry={entry} /></View>
-             <View style={{  marginBottom:4 }}><ShareButton entry={entry} /></View>
+             <TouchableOpacity onPress={handleAction}>
+               <Ionicons name='chatbox-outline' size={26} color={colors.primary} />
+             </TouchableOpacity>
            </View>
          </View>
         </View>
       </TouchableOpacity>
+
+
       <Modal visible={modalVisible} animationType='slide' transparent>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -282,7 +299,30 @@ const handleDoublePress = () => {
         </View>
        </KeyboardAvoidingView>
       </Modal>
-   
+      <CustomActionSheet
+        visible={isActionSheetVisible}
+        title="Vehicle Action"
+        message={`Choose action for ${vehicle}`}
+        onClose={handleClose}
+        options={[
+          {
+            text: 'Command',
+            onPress: () => ( handleCommand(sim) ),
+          },
+          {
+            text: 'Credentials',
+            onPress: () =>  { handleOnboard(vehicle || '', username || '', mobile || 0) },
+          },
+          {
+            text: 'Reminder',
+            onPress: () => { handleReminder(vehicle || '', expdate || '', mobile || 0) },
+          },
+          {
+            text: 'Warning',
+            onPress: () => { handleWarning(vehicle || '', mobile || 0) },         
+          },
+        ]}
+      />
     </>
   );
 })
