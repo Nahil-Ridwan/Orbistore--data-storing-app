@@ -167,7 +167,11 @@ const handleDoublePress = async () => {
       </TouchableOpacity>
 
 
-      <Modal visible={modalVisible} animationType='slide' transparent>
+      <Modal 
+        visible={modalVisible} 
+        animationType='slide' 
+        transparent 
+        statusBarTranslucent={true}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
