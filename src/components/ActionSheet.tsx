@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
-import { Animated, Modal, PanResponder, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, Modal, PanResponder, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../styles/global';
 
 export type ActionOption = {
@@ -72,30 +72,30 @@ export default function CustomActionSheet({
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const slideAnimation = useRef(new Animated.Value(300)).current;
 
-  useEffect(() => {
-    if (visible) {
-      // Animate both values when becoming visible
-      Animated.parallel([
-        // Fade in the overlay
-        Animated.timing(overlayOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        // Slide up the content
-        Animated.spring(slideAnimation, {
-          toValue: 0,
-          tension: 65,
-          friction: 11,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      // Reset animation values when hidden
-      overlayOpacity.setValue(0);
-      slideAnimation.setValue(300);
-    }
-  }, [visible]);
+  const handleModalShow = () => {
+  Animated.parallel([
+    Animated.timing(overlayOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }),
+    Animated.timing(slideAnimation, {
+  toValue: 0,
+  duration: 280,
+  easing: Easing.out(Easing.cubic), // import { Easing } from 'react-native'
+  useNativeDriver: true,
+}),
+  ]).start();
+};
+
+useEffect(() => {
+  if (!visible) {
+    // Reset animation values when hidden
+    overlayOpacity.setValue(0);
+    slideAnimation.setValue(300);
+  }
+  // no "open" animation here anymore — handled by onShow below
+}, [visible]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -137,10 +137,13 @@ export default function CustomActionSheet({
       transparent={true}
       visible={visible}
       onRequestClose={handleClose}
+      onShow={handleModalShow}      // ⬅ add this
+      hardwareAccelerated={true} 
       statusBarTranslucent={true} // Add this
     >
       {/* Animated Overlay - Fades in/out */}
       <Animated.View
+        collapsable={false}
         style={[
           styles.overlay,
           { opacity: overlayOpacity }
@@ -153,6 +156,7 @@ export default function CustomActionSheet({
         >
           {/* Animated Content - Slides up/down */}
           <Animated.View
+            collapsable={false}
             style={[
               styles.actionSheetContainer,
               {
@@ -160,16 +164,15 @@ export default function CustomActionSheet({
                 paddingBottom: 30,
               }
             ]}
-            {...panResponder.panHandlers}  // Add this line
           >
             <TouchableOpacity
               activeOpacity={1}
               onPress={(e) => e.stopPropagation()} // Prevent closing when tapping inside
             >
-              <View style={styles.dragIndicator} />
-              <Text style={styles.title}>{title}</Text>
+              <View style={styles.dragIndicator} {...panResponder.panHandlers}/>
+              <Text style={styles.title} {...panResponder.panHandlers}>{title}</Text>
 
-              {message && <Text style={styles.subtitle}>{message}</Text>}
+              <Text style={styles.subtitle } {...panResponder.panHandlers}>{message}</Text>
 
               {/* Action buttons, laid out in rows of up to 3 */}
               <View style={styles.actionButtonsGrid}>
@@ -214,7 +217,7 @@ export default function CustomActionSheet({
 const styles = StyleSheet.create({
   buttons: {
     flex: 1, // each tile fills an equal share of its own row's width
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     padding: 15,
     borderRadius: 10,
     alignItems: 'flex-start',
@@ -224,7 +227,7 @@ const styles = StyleSheet.create({
 
   bigbuttons: {
     flex:1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     padding: 15,
     height: 125,
     borderRadius: 10,
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
   },
 
   actionSheetContainer: {
-    backgroundColor: colors.popup,
+    backgroundColor: colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 23,
