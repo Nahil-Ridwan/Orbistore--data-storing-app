@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     flex: 1, // each tile fills an equal share of its own row's width
     backgroundColor: colors.surface,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
     aspectRatio: 0.8, // keep tiles square-ish like the reference image; remove if not desired
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     padding: 15,
     height: 125,
-    borderRadius: 10,
+    borderRadius: 15,
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
   },
