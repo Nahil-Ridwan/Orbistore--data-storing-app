@@ -3,11 +3,12 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { deleteCompany } from '../storage_company/coreCrud_company';
 import { Company } from '../storage_company/typeCompany';
 import { colors } from '../styles/global';
+import { handleContact } from '../utility/Actions';
 
 
 export default React.memo(function CompanyItem({
   
-  companyid, name, companyplace, stock, unpaid
+  companyid, name, companyplace, contactperson, contactnum, stock, unpaid
 }: Company) {
   
 
@@ -18,7 +19,9 @@ export default React.memo(function CompanyItem({
     ]);
   };
 
-
+  const  handlePress = () => {
+    handleContact(contactnum || 0);
+  }
 
 
   return (
@@ -42,6 +45,11 @@ export default React.memo(function CompanyItem({
 
          </View>
 
+         <View style={styles.info}>
+            <Text style={styles.place}>{contactperson}</Text>
+            <Text style={styles.place} onPress={handlePress}>{contactnum}</Text>            
+          </View>
+
         </View>
       </Pressable>
     
@@ -53,7 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface, 
     borderRadius: 15, 
     paddingTop: 16, 
-    paddingBottom:9, 
+    paddingBottom:16, 
     paddingHorizontal:10, 
     marginBottom: 10 
   },
@@ -77,7 +85,7 @@ const styles = StyleSheet.create({
 
   numbercard: {
     flexDirection:'row', 
-    marginTop:10, 
+    marginVertical:10, 
     justifyContent:'space-between',
     backgroundColor: 'hsl(240, 20%, 32%)', 
     padding:9, 

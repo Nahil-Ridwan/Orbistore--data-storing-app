@@ -191,6 +191,8 @@ const parseCompanyRows = (data: any[]): Company[] =>
       companyid: row.companyid ? String(row.companyid) : Date.now().toString() + Math.random().toString(36).slice(2),
       name: row.name ?? '',
       companyplace: row.companyplace ?? undefined,
+      contactperson: row.contactperson ?? undefined,
+      contactnum: Number(row.contactnum) || 0,
       stock: row.stock !== undefined && row.stock !== '' ? Number(row.stock) : undefined,
       unpaid,
       payment,

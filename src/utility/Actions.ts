@@ -61,7 +61,46 @@ For any assistance;
     const phone = String(mobile).replace(/\D/g, '');
 
     await openWhatsAppBusiness(phone, message);
-}  
+}
+
+export const handleOnboardcompany = async (vehicle: string, username: string, contactnum: number) => {
+const message = `💫💫💫
+Dear customer, 
+
+Orbitracker GPS തെരെഞ്ഞെടുത്തതിന് നന്ദി...👍👍
+
+✅ ${vehicle}
+വാഹനത്തിലെ GPS  ഇപ്പോൾ SET ആണ്.
+
+
+TB TRACK Android link 👇🏻 ആൻഡ്രോയിഡ്
+https://play.google.com/store/apps/details?id=com.tbtrack.gps
+
+
+TB TRACK iOS link 👇 ഐഫോൺ
+https://apps.apple.com/us/app/tb-track-vehicle-tracking/id1249657981
+
+🔖 User ID: ${username}
+🔑 PWD: 112233
+
+For any assistance;
+
+              Please Call or WhatsApp;
+📌        9645 994 556 
+               www.orbixgps.com`;
+
+    const phone = String(contactnum).replace(/\D/g, '');
+
+    await openWhatsAppBusiness(phone, message);
+}
+
+export const handleContact = async (contactnum: number) => {
+const message = ``;
+
+    const phone = String(contactnum).replace(/\D/g, '');
+
+    await openWhatsAppBusiness(phone, message);
+}
 
 export const handleReminder = async (vehicle: string, expdate: string, mobile: number) => {
     const message = `🚨നിങ്ങളുടെ ${vehicle}

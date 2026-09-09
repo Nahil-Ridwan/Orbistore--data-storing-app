@@ -117,7 +117,7 @@ export default function TabLayout() {
        <NetworkToast />
 
       {/* Custom Tab Bar */}
-      <View style={[styles.tabBar, { bottom: insets.bottom + 16 }]}>
+      <View style={[styles.tabBar, { bottom: insets.bottom + 0 }]}>
         <BlurView
           intensity={80}
           tint="dark"

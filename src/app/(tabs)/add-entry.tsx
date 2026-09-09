@@ -40,6 +40,8 @@ export default function AddEntryScreen() {
   //for company
   const [name, setName] = useState('');
   const [companyplace, setCompanyplace] = useState('');
+  const [contactperson, setContactperson] = useState('');
+  const [contactnum, setContactnum] = useState('');
 
   const [addvehicle, setAddvehicle] = useState(true);
 
@@ -125,12 +127,14 @@ export default function AddEntryScreen() {
     }
     
     // rest unchanged...
-      console.log('saving company:', { name, companyplace});
+      console.log('saving company:', { name, companyplace, contactperson, contactnum});
       
       // for company
       addCompany({
         name: name || 'Nil',
         companyplace: companyplace || 'Nil',
+        contactperson: contactperson || 'Nil',
+        contactnum: Number(contactnum) || 0,
         stock: 0,
         unpaid: 0,
         
@@ -141,6 +145,8 @@ export default function AddEntryScreen() {
   
       setName('');
       setCompanyplace('');
+      setContactperson('');
+      setContactnum('');
     };
 
   return (
@@ -348,6 +354,26 @@ export default function AddEntryScreen() {
             value={companyplace}
             onChangeText={setCompanyplace}
           />
+
+          <View style={styles.row}>
+            <TextInput
+                style={[styles.input, styles.rowInput]}
+                placeholder='Contact Person'
+                placeholderTextColor={colors.textSecondary}
+                autoCapitalize='characters'
+                value={contactperson}
+                onChangeText={setContactperson}
+            />
+      
+            <TextInput
+                style={[styles.input, styles.rowInput]}
+                placeholder='Mobile'
+                placeholderTextColor={colors.textSecondary}
+                keyboardType='numeric'
+                value={contactnum}
+                onChangeText={setContactnum}
+            />
+          </View>
   
         <TouchableOpacity style={styles.button} onPress={handleAddCompany}>
           <Text style={styles.buttonText}>Add Company</Text>

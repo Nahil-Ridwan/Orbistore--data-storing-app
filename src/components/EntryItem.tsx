@@ -5,8 +5,8 @@ import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, T
 import { deleteEntry, updateEntry } from '../storage_entry/coreCrud';
 import { Entry } from '../storage_entry/typeEntry';
 import { colors } from '../styles/global';
-import { handleCommand, handleOnboard, handleReminder, handleWarning } from '../utility/Actions';
-import { formatDate, isExpired, syncStatuses } from '../utility/helpers';
+import { handleCommand, handleOnboard, handleOnboardcompany, handleReminder, handleWarning } from '../utility/Actions';
+import { findcontactnum, formatDate, isExpired, syncStatuses } from '../utility/helpers';
 import CustomActionSheet from './ActionSheet';
 
 
@@ -156,7 +156,9 @@ const handleDoublePress = async () => {
             : '#a0a0b0'}}>
             {displayStatus}</Text>
            <View style={styles.actionButtons}>
-             <TouchableOpacity onPress={handleAction}>
+             <TouchableOpacity
+               onPress={handleAction}
+               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                <Ionicons name='chatbox-outline' size={26} color={colors.primary} />
              </TouchableOpacity>
            </View>
@@ -308,18 +310,27 @@ const handleDoublePress = async () => {
           {
             text: 'Command',
             onPress: () => ( handleCommand(sim) ),
+            icon: 'flash-outline'
           },
           {
             text: 'Credentials',
             onPress: () =>  { handleOnboard(vehicle || '', username || '', mobile || 0) },
+            icon: 'person-outline'
+          },
+          {
+            text: 'Company',
+            onPress: async () =>  { const contactnum = await findcontactnum(company || ''); handleOnboardcompany(vehicle || '', username || '', contactnum || 0) },
+            icon: 'storefront-outline'
           },
           {
             text: 'Reminder',
             onPress: () => { handleReminder(vehicle || '', expdate || '', mobile || 0) },
+            icon: 'notifications-outline'
           },
           {
             text: 'Warning',
             onPress: () => { handleWarning(vehicle || '', mobile || 0) },         
+            icon: 'warning-outline'
           },
         ]}
       />

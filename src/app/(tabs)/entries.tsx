@@ -222,6 +222,8 @@ export default function AllEntriesScreen({ entries, companies, searchVisible, se
             companyid={company.companyid}
             name={company.name}
             companyplace={company.companyplace}
+            contactperson={company.contactperson}
+            contactnum={company.contactnum}
             stock={company.stock}
             unpaid={company.unpaid}
             payment={company.payment}

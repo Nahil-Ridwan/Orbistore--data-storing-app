@@ -23,6 +23,15 @@ export const getCompanies = async (): Promise<Company[]> => {
   return sortCompanies(cached);
 };
 
+// finding number
+export const findcontactnum = async (company: string): Promise<number | undefined> => {
+  const companies = await getCompanies();
+  const foundCompany = companies.find(
+    (c) => c.name?.toLowerCase().trim() === company.toLowerCase().trim()
+  );
+  return foundCompany?.contactnum;
+};
+
 
 // ---- Shared date helpers ----
 export const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
